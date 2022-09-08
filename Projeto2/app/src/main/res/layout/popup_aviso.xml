@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="200dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:fontFamily="@font/poppinsbold"
+        android:text="Ao excluir sua conta, todos os seus dados serão apagados permanentemente. Para entrar no app novamente, uma nova conta deverá ser criada."
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:paddingLeft="10dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <Button
+        android:id="@+id/btnReturn"
+        android:layout_marginRight="80dp"
+        android:layout_marginTop="30dp"
+        android:layout_width="110dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsbold"
+        android:text="Voltar"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textColor="@color/black"
+
+        />
+
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="110dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="80dp"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsbold"
+        android:text="Confirmar"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+
+        />
+</LinearLayout>
+

@@ -121,13 +121,13 @@
 
     <ImageView
         android:id="@+id/imgProfileRegister"
-        android:layout_width="183dp"
-        android:layout_height="223dp"
-        android:layout_marginTop="4dp"
+        android:layout_width="187dp"
+        android:layout_height="189dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/pic_circle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/fundouser" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imgBack"

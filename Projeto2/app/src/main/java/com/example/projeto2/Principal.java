@@ -10,18 +10,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SearchView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class Principal extends AppCompatActivity {
 
     FloatingActionButton btnAddProduct;
-    private Button btnVoltarLogin;
+    private Button btnBackLogin, btnGoProfile;
     public static int voltou = 0;
     private Dialog addProduct;
 
@@ -36,11 +33,12 @@ public class Principal extends AppCompatActivity {
 
         voltou = 0;
 
-        btnVoltarLogin = findViewById(R.id.btnVoltarLogin);
+        btnBackLogin = findViewById(R.id.btnBackLogin);
         btnAddProduct = findViewById(R.id.btnAddProduct);
+        btnGoProfile = findViewById(R.id.btnGoProfile);
 
 
-        btnVoltarLogin.setOnClickListener(new View.OnClickListener() {
+        btnBackLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 VoltarLogin();
@@ -52,6 +50,13 @@ public class Principal extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ShowPopup(view);
+            }
+        });
+
+        btnGoProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                GoProfile();
             }
         });
 
@@ -68,7 +73,7 @@ public class Principal extends AppCompatActivity {
 
         Button btnSaveProduct;
         EditText edtNameProduct;
-        addProduct.setContentView(R.layout.custom_popup);
+        addProduct.setContentView(R.layout.popup_adicionarproduto);
 
         edtNameProduct = addProduct.findViewById(R.id.edtNameProduct);
         btnSaveProduct = addProduct.findViewById(R.id.btnSaveProduct);
@@ -86,5 +91,10 @@ public class Principal extends AppCompatActivity {
         });
         addProduct.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addProduct.show();
+    }
+
+    private void GoProfile() {
+        Intent intent = new Intent(Principal.this, Perfil.class);
+        startActivity(intent);
     }
 }
