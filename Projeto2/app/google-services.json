@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "390320075381",
+    "project_id": "projeto2-fcfaf",
+    "storage_bucket": "projeto2-fcfaf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390320075381:android:45719e647d02a08f9d7e3c",
+        "android_client_info": {
+          "package_name": "com.example.projeto2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390320075381-hmf63bbb7cj2ohlnv4atjvlupna23kjs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVCJM2h1r1RFtd56SIr1wUatcJBY5rEXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390320075381-hmf63bbb7cj2ohlnv4atjvlupna23kjs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

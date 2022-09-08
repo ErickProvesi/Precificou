@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.125" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_button_pointer.xml" value="0.125" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_edit_text.xml" value="0.125" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/shadow_edit_text.xml" value="0.125" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.25" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.209375" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/activity_main.xml" value="0.209375" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.22" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/layout/custom_edit_text.xml" value="0.1953125" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.12" />
+        <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.125" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.188" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.188" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.22" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.25" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.20833333333333334" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.3675" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_edit_text.xml" value="0.3675" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_search.xml" value="0.3675" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.33" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.33" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.22282608695652173" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/menu/menu.xml" value="0.36666666666666664" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

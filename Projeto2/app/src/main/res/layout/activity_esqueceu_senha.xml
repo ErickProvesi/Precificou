@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/recuperacaoconta"
+    tools:context=".EsqueceuSenha">
+
+    <TextView
+        android:id="@+id/txtRecover2"
+        android:layout_width="345dp"
+        android:layout_height="86dp"
+        android:layout_marginTop="516dp"
+        android:fontFamily="@font/poppinssemibold"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgBackRecover"
+        android:layout_width="34dp"
+        android:layout_height="17dp"
+        android:layout_marginTop="12dp"
+        android:rotation="180"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.981"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/seta" />
+
+    <TextView
+        android:id="@+id/txtTitleRecover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:fontFamily="@font/poppinsbold"
+        android:letterSpacing="0.1"
+        android:text="RECUPERAÇÃO DA CONTA"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtRecover"
+        android:layout_width="345dp"
+        android:layout_height="86dp"
+        android:layout_marginTop="136dp"
+        android:fontFamily="@font/poppinssemibold"
+        android:text="Vamos recuperar sua conta do Precifico. Informe-nos o E-mail utilizado no cadastro para o envio das orientações."
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edtEmailRecover"
+        android:layout_width="298dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="276dp"
+        android:background="@drawable/custom_edit_text"
+        android:elevation="4dp"
+        android:ems="10"
+        android:fontFamily="@font/poppinsregular"
+        android:hint="E-mail"
+        android:inputType="textEmailAddress"
+        android:textColor="#BF000000"
+        android:textColorHint="#969696"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSendRecover"
+        android:layout_width="119dp"
+        android:layout_height="39dp"
+        android:layout_marginBottom="328dp"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsbold"
+        android:letterSpacing="0.2"
+        android:text="ENVIAR"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgEmailRecover"
+        android:layout_width="34dp"
+        android:layout_height="18dp"
+        android:layout_marginTop="289dp"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.848"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/vetoremail" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
