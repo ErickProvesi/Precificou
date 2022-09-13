@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="564dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtAddIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textColor="@color/white"
+        android:text="Adicionar Ingrediente"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@drawable/custom_search"
+        android:layout_marginTop="20dp"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/custom_button"
+        android:layout_marginTop="5dp"
+        />
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:background="@drawable/custom_button"
+        android:layout_gravity="center"
+        android:layout_marginTop="370dp"
+        android:text="OK"
+        android:fontFamily="@font/poppinssemibold"
+        android:textColor="@color/black"
+        />
+</LinearLayout>
