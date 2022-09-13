@@ -57,8 +57,6 @@ public class Cadastro extends AppCompatActivity {
         imgEyeRegister = findViewById(R.id.imgEyeRegister);
         ImgEyeRegister2 = findViewById(R.id.imgEyeRegister2);
 
-
-
         imgEyeRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -50,6 +50,7 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
 
         txtForgotPassword = findViewById(R.id.txtForgotPassword);
@@ -241,7 +242,7 @@ public class Login extends AppCompatActivity {
         //Métodos Intent
     }
     private void MainScreen() {
-        Intent Gomain = new Intent(Login.this, Principal.class);
+        Intent Gomain = new Intent(Login.this, ViewPager.class);
         startActivity(Gomain);
         finish();
     }

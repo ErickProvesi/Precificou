@@ -15,7 +15,7 @@
         android:layout_height="30dp"
         android:textColor="@color/white"
         android:text="Alterar E-mail"
-        android:fontFamily="@font/poppinsbold"
+        android:fontFamily="@font/poppinsextrabold"
         android:textAlignment="center"
         android:textSize="20dp"
         android:layout_marginTop="10dp"
@@ -95,7 +95,7 @@
         android:layout_marginBottom="20dp"
         android:layout_marginTop="25dp"
         android:text="Alterar E-mail"
-        android:fontFamily="@font/poppinsbold"
+        android:fontFamily="@font/poppinsextrabold"
         android:textColor="@color/black"
 
         />

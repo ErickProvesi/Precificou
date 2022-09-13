@@ -1,10 +1,12 @@
 package com.example.projeto2;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -52,7 +54,7 @@ public class Perfil extends AppCompatActivity {
 
     }
 
-    private void ShowEmailPopup(View view){
+    public void ShowEmailPopup(View view){
         Button btnModifyEmail;
         EditText edtCurrentEmail, edtNewEmail, edtConfirmNewEmail, edtPassword;
 
@@ -69,50 +71,51 @@ public class Perfil extends AppCompatActivity {
         ModifyEmail.show();
     }
 
-    private void ShowPasswordPopup(View view) {
+    public void ShowPasswordPopup(View view) {
         Button btnModifyPassword;
         EditText edtCurrentPassword, edtNewPassword, edtConfirmNewPassword;
 
         ModifyPassword.setContentView(R.layout.popup_alterarsenha);
 
-        btnModifyPassword = findViewById(R.id.btnModifyPassword);
-        edtCurrentPassword = findViewById(R.id.edtCurrentPassword);
-        edtNewPassword = findViewById(R.id.edtNewPassword);
-        edtConfirmNewPassword = findViewById(R.id.edtConfirmNewPassword);
+        btnModifyPassword = ModifyPassword.findViewById(R.id.btnModifyPassword);
+        edtCurrentPassword = ModifyPassword.findViewById(R.id.edtCurrentPassword);
+        edtNewPassword = ModifyPassword.findViewById(R.id.edtNewPassword);
+        edtConfirmNewPassword = ModifyPassword.findViewById(R.id.edtConfirmNewPassword);
 
         ModifyPassword.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         ModifyPassword.show();
     }
-
-    private void ShowDeletePopup(View view) {
-        Button btnDeleteAccount;
+    public void ShowDeletePopup(View view) {
         EditText edtEmail, edtPassword, edtConfirmPassword;
+        Button btnDeleteAccountPopUp;
 
         DeleteAccount.setContentView(R.layout.popup_excluirconta);
 
-        btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
-        edtEmail = findViewById(R.id.edtEmail);
-        edtPassword = findViewById(R.id.edtPassword);
-        edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
+        edtEmail = DeleteAccount.findViewById(R.id.edtEmail);
+        edtPassword = DeleteAccount.findViewById(R.id.edtPassword);
+        edtConfirmPassword = DeleteAccount.findViewById(R.id.edtConfirmPassword);
+        btnDeleteAccountPopUp = DeleteAccount.findViewById(R.id.btnDeleteAccountPopUp);
 
-        btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
+        btnDeleteAccountPopUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ShowWarningPopup(view);
+                DeleteAccount.dismiss();
+                ShowWarningPopup();
             }
         });
 
         DeleteAccount.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         DeleteAccount.show();
+
     }
 
-    private void ShowWarningPopup(View view) {
+    public void ShowWarningPopup() {
         Button btnReturn, btnConfirm;
 
         Warning.setContentView(R.layout.popup_aviso);
 
-        btnReturn = findViewById(R.id.btnReturn);
-        btnConfirm = findViewById(R.id.btnConfirm);
+        btnReturn = Warning.findViewById(R.id.btnReturn);
+        btnConfirm = Warning.findViewById(R.id.btnConfirm);
 
         Warning.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         Warning.show();

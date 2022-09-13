@@ -1,7 +1,13 @@
 package com.example.projeto2;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -9,11 +15,23 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Principal extends AppCompatActivity {
 
@@ -21,6 +39,9 @@ public class Principal extends AppCompatActivity {
     private Button btnBackLogin, btnGoProfile;
     public static int voltou = 0;
     private Dialog addProduct;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private String userID;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +59,7 @@ public class Principal extends AppCompatActivity {
         btnGoProfile = findViewById(R.id.btnGoProfile);
 
 
+
         btnBackLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -46,7 +68,6 @@ public class Principal extends AppCompatActivity {
         });
 
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.S)
             @Override
             public void onClick(View view) {
                 ShowPopup(view);
@@ -68,7 +89,6 @@ public class Principal extends AppCompatActivity {
         finish();
 
     }
-    @RequiresApi(api = Build.VERSION_CODES.S)
     public void ShowPopup(View view) {
 
         Button btnSaveProduct;
@@ -86,8 +106,42 @@ public class Principal extends AppCompatActivity {
 
                 }else {
 
+                    userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+
+                    Map<String, Object> product = new HashMap<>();
+                    product.put("capacidadeBotijao", 0);
+                    product.put("consumoQueimadorGas",0);
+                    product.put("descricaoProduto",0);
+                    product.put("fotoProduto",0);
+                    product.put("idUsuario", userID);
+                    product.put("idProduto",0);
+                    product.put("kmLitroVeiculo",0);
+                    product.put("kmRodado",0);
+                    product.put("margemLucro",0);
+                    product.put("nomeProduto",edtNameProduct.getText().toString());
+                    product.put("outroCusto",0);
+                    product.put("precoBotijao",0);
+                    product.put("precoCombustivel",0);
+                    product.put("tempoUsoEnergia",0);
+                    product.put("tempoUsoGas",0);
+                    product.put("valorKWH",0);
+
+                    DocumentReference documentReference = db.collection("Produto").document(UUID.randomUUID().toString());
+                    documentReference.set(product).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d("db", "Sucesso ao salvar os dados");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d("db_error" ,"Erro ao salvar os dados" + e.toString());
+                                }
+                            });
                 }
-            }
+                }
         });
         addProduct.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addProduct.show();
@@ -97,4 +151,6 @@ public class Principal extends AppCompatActivity {
         Intent intent = new Intent(Principal.this, Perfil.class);
         startActivity(intent);
     }
+
+
 }

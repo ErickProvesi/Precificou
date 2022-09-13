@@ -45,6 +45,7 @@
 
     <EditText
         android:id="@+id/edtNameRegister"
+        android:paddingLeft="10dp"
         android:layout_width="298dp"
         android:layout_height="43dp"
         android:layout_marginBottom="436dp"
@@ -67,6 +68,7 @@
         android:id="@+id/edtPasswordRegister"
         android:layout_width="298dp"
         android:layout_height="43dp"
+        android:paddingLeft="10dp"
         android:layout_marginBottom="304dp"
         android:background="@drawable/custom_edit_text"
         android:ems="10"
@@ -86,6 +88,7 @@
         android:id="@+id/edtEmailRegister"
         android:layout_width="298dp"
         android:layout_height="43dp"
+        android:paddingLeft="10dp"
         android:layout_marginBottom="372dp"
         android:background="@drawable/custom_edit_text"
         android:ems="10"
@@ -106,6 +109,7 @@
         android:layout_height="43dp"
         android:layout_marginBottom="236dp"
         android:background="@drawable/custom_edit_text"
+        android:paddingLeft="10dp"
         android:ems="10"
         android:fontFamily="@font/poppinsmedium"
         android:hint="Confirmar Senha"

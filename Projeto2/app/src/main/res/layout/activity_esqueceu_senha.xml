@@ -61,6 +61,7 @@
     <EditText
         android:id="@+id/edtEmailRecover"
         android:layout_width="298dp"
+        android:paddingLeft="10dp"
         android:layout_height="43dp"
         android:layout_marginTop="276dp"
         android:background="@drawable/custom_edit_text"
