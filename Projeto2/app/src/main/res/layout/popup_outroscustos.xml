@@ -1,0 +1,211 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="350dp"
+    android:layout_height="380dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtQuantityIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="5dp"
+        android:fontFamily="@font/poppinsextrabold"
+        android:text="Insira o(s) valor(es) ou calcule:"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edtValueElectricity"
+            android:layout_width="165dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="16dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinssemibold"
+            android:hint="Energia Elétrica"
+            android:inputType="textPassword"
+            android:paddingLeft="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hintColor"
+            android:textSize="13dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.150"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="25dp"
+            android:layout_height="21dp"
+            android:layout_marginTop="23dp"
+            android:layout_marginLeft="12dp"
+            android:text="ou"
+            android:textSize="16dp"
+            android:textColor="@color/white"/>
+
+        <Button
+            android:id="@+id/btnCalculateEletricity"
+            android:layout_width="95dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="8dp"
+            android:text="Calcular"
+            android:textSize="10dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/poppinsextrabold"
+            android:background="@drawable/custom_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.108"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edtValueCookingGas"
+            android:layout_width="165dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="16dp"
+            android:background="@drawable/custom_edit_text"
+            android:fontFamily="@font/poppinssemibold"
+            android:hint="Gás"
+            android:inputType="textPassword"
+            android:paddingLeft="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hintColor"
+            android:textSize="13dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.150"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="25dp"
+            android:layout_height="21dp"
+            android:layout_marginTop="23dp"
+            android:layout_marginLeft="12dp"
+            android:text="ou"
+            android:textSize="16dp"
+            android:textColor="@color/white"/>
+
+        <Button
+            android:id="@+id/btnCalculateCookingGas"
+            android:layout_width="95dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="8dp"
+            android:text="Calcular"
+            android:textSize="10dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/poppinsextrabold"
+            android:background="@drawable/custom_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.108"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </LinearLayout><LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/edtValueFuel"
+        android:layout_width="165dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="16dp"
+        android:background="@drawable/custom_edit_text"
+        android:fontFamily="@font/poppinssemibold"
+        android:hint="Gasolina"
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.150"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="25dp"
+        android:layout_height="21dp"
+        android:layout_marginTop="23dp"
+        android:layout_marginLeft="12dp"
+        android:text="ou"
+        android:textSize="16dp"
+        android:textColor="@color/white"/>
+
+    <Button
+        android:id="@+id/btnCalculateFuel"
+        android:layout_width="95dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="8dp"
+        android:text="Calcular"
+        android:textSize="10dp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/poppinsextrabold"
+        android:background="@drawable/custom_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.108"
+        app:layout_constraintStart_toStartOf="parent" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edtOtherValues"
+        android:layout_width="307dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/custom_edit_text"
+        android:fontFamily="@font/poppinssemibold"
+        android:hint="Água, Material de Limpeza, Transporte, etc... "
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.150"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/custom_button"
+            android:fontFamily="@font/poppinsextrabold"
+            android:text="Salvar"
+            android:textSize="13dp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.886"
+            app:layout_constraintStart_toStartOf="parent" />
+
+</LinearLayout>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="370dp"
+    android:layout_height="690dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <View
+        android:id="@+id/viwViewTagIngredient"
+        android:layout_width="350dp"
+        android:layout_height="200dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/view_addingredient_tag"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <SearchView
+        android:id="@+id/schMyIngredient"
+        android:layout_width="350dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/custom_search"
+        android:queryHint="Pesquisar Produtos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+
+    <View
+        android:id="@+id/viwViewIngredient"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/view_addingredient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="120dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsextrabold"
+        android:text="Salvar"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        />
+
+</LinearLayout>
+

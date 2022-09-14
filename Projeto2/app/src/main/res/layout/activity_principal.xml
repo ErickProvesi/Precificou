@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/poppinsextrabold"
         android:letterSpacing="0.2"
         android:text="Produtos"
@@ -50,7 +50,7 @@
         app:srcCompat="@drawable/iconeadicionar" />
 
     <SearchView
-        android:id="@+id/schMyIngredients"
+        android:id="@+id/schMyProducts"
         android:layout_width="300dp"
         android:layout_height="33dp"
         android:layout_marginStart="4dp"
@@ -73,7 +73,7 @@
         app:iconGravity="top"
         app:iconSize="18dp"
         app:iconTint="#000000"
-        app:layout_constraintStart_toEndOf="@+id/schMyIngredients"
+        app:layout_constraintStart_toEndOf="@+id/schMyProducts"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View

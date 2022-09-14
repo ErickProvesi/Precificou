@@ -8,17 +8,15 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Bundle;
-import android.system.Os;
 import android.view.View;
 
 import org.jetbrains.annotations.NotNull;
 
 public class ViewPager extends FragmentActivity {
 
-    private static final int Num_Pages=3;
+    private static final int Num_Pages=2;
     private FragmentStateAdapter pagerAdapter;
     private ViewPager2 vpgViewPager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +26,7 @@ public class ViewPager extends FragmentActivity {
         vpgViewPager = findViewById(R.id.vpgViewPager);
         pagerAdapter = new ViewPager.ScreenSliderPageAdapter(this);
         vpgViewPager.setAdapter(pagerAdapter);
+        System.out.println(" teste");
     }
 
     private class ScreenSliderPageAdapter extends FragmentStateAdapter {
@@ -50,20 +49,15 @@ public class ViewPager extends FragmentActivity {
                 case 1:
                     op = 1;
                     break;
-                case 2:
-                    op = 2;
-                    break;
                 default:
                     return null;
             }
             if(op == 0){
-                return new FragmentoPerfil();
-
-            }else if (op == 1){
+                System.out.println("TESTE1");
                 return new FragmentoProduto();
-
-            }else {
-                return new FragmentoMeusIngredientes();
+            }else{
+                System.out.println("TESTE2");
+                return new FragmentoPerfil();
             }
         }
 

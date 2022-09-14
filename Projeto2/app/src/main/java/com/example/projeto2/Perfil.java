@@ -2,7 +2,6 @@ package com.example.projeto2;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 
 import android.app.Dialog;
 import android.graphics.Color;
@@ -13,12 +12,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class Perfil extends FragmentActivity {
+public class Perfil extends AppCompatActivity {
 
     private Dialog ModifyEmail, ModifyPassword, DeleteAccount, Warning;
     private Button btnModifyEmail, btnModifyPassword, btnDeleteAccount;
-
-    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
