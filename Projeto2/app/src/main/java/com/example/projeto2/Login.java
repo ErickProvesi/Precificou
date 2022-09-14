@@ -134,7 +134,7 @@ public class Login extends AppCompatActivity {
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()){
                 Toast.makeText(getApplicationContext(), "Login com Google efetuado com sucesso", Toast.LENGTH_SHORT);
-                MainScreen();
+                mainScreen();
             }else {
                 Toast.makeText(getApplicationContext(), "Erro ao efetuar login com Google", Toast.LENGTH_SHORT);
             }
@@ -177,7 +177,7 @@ public class Login extends AppCompatActivity {
     class CustomClickableSpan2 extends ClickableSpan {
 
         public void onClick(View view) {
-            RegistrationScreen();
+            registrationScreen();
         }
     @Override
 
@@ -201,11 +201,9 @@ public class Login extends AppCompatActivity {
                new Handler().postDelayed(() -> {
                    Toast toast = Toast.makeText(getApplicationContext(), "Login efetuado com Sucesso.", Toast.LENGTH_SHORT);
                    toast.show();
-                   MainScreen();
+                   mainScreen();
 
-               },2000);
-
-
+               },1000);
 
             }else {
                 String error;
@@ -236,17 +234,17 @@ public class Login extends AppCompatActivity {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null && Principal.voltou == 0) {
-            MainScreen();
+            mainScreen();
         }
 
         //Métodos Intent
     }
-    private void MainScreen() {
+    private void mainScreen() {
         Intent Gomain = new Intent(Login.this, ViewPager.class);
         startActivity(Gomain);
         finish();
     }
-    private void RegistrationScreen() {
+    private void registrationScreen() {
         Intent GoRegister = new Intent(Login.this, Cadastro.class);
         startActivity(GoRegister);
         finish();

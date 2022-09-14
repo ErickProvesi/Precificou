@@ -1,10 +1,11 @@
 package com.example.projeto2;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
 
-public class MeusIngredientes extends AppCompatActivity {
+public class MeusIngredientes extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

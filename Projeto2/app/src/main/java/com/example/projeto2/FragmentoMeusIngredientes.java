@@ -11,9 +11,12 @@ import androidx.fragment.app.Fragment;
 
 public class FragmentoMeusIngredientes extends Fragment {
 
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
         return (ViewGroup)inflater.inflate(R.layout.activity_meus_ingredientes,container,false);
 
 

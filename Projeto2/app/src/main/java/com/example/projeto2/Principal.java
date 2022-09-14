@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Principal extends AppCompatActivity {
+public class Principal extends FragmentActivity {
 
     FloatingActionButton btnAddProduct;
     private Button btnBackLogin, btnGoProfile;
@@ -48,9 +48,7 @@ public class Principal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
-
         addProduct = new Dialog(this);
-
 
         voltou = 0;
 
@@ -58,38 +56,36 @@ public class Principal extends AppCompatActivity {
         btnAddProduct = findViewById(R.id.btnAddProduct);
         btnGoProfile = findViewById(R.id.btnGoProfile);
 
-
-
         btnBackLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                VoltarLogin();
+                returnLogin();
             }
         });
 
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ShowPopup(view);
+                showPopup(view);
             }
         });
 
         btnGoProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GoProfile();
+                goProfile();
             }
         });
 
     }
-    private void VoltarLogin() {
+    private void returnLogin() {
         voltou++;
         Intent voltarLogin = new Intent(Principal.this, Login.class);
         startActivity(voltarLogin);
         finish();
 
     }
-    public void ShowPopup(View view) {
+    public void showPopup(View view) {
 
         Button btnSaveProduct;
         EditText edtNameProduct;
@@ -147,7 +143,7 @@ public class Principal extends AppCompatActivity {
         addProduct.show();
     }
 
-    private void GoProfile() {
+    private void goProfile() {
         Intent intent = new Intent(Principal.this, Perfil.class);
         startActivity(intent);
     }

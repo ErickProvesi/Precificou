@@ -15,8 +15,8 @@ import android.widget.EditText;
 
 public class Perfil extends FragmentActivity {
 
-    private Dialog ModifyEmail, ModifyPassword, DeleteAccount, Warning;
-    private Button btnModifyEmail, btnModifyPassword, btnDeleteAccount;
+    private  Dialog EditEmail, EditPassword, DeleteAccount, Warning;
+    private  Button btnEditEmail, btnEditPassword, btnDeleteAccount;
 
     
 
@@ -25,70 +25,70 @@ public class Perfil extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil);
 
-        btnModifyEmail = findViewById(R.id.btnModifyEmail);
-        btnModifyPassword = findViewById(R.id.btnModifyPassword);
+        btnEditEmail = findViewById(R.id.btnEditEmail);
+        btnEditPassword = findViewById(R.id.btnEditPassword);
         btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
 
-        ModifyEmail = new Dialog(this);
-        ModifyPassword = new Dialog(this);
+        EditEmail = new Dialog(this);
+        EditPassword = new Dialog(this);
         DeleteAccount = new Dialog(this);
         Warning = new Dialog(this);
 
-        btnModifyEmail.setOnClickListener(new View.OnClickListener() {
+        btnEditEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ShowEmailPopup(view);
+                showEmailPopup(view);
             }
         });
 
-        btnModifyPassword.setOnClickListener(new View.OnClickListener() {
+        btnEditPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ShowPasswordPopup(view);
+                showPasswordPopup(view);
             }
         });
 
         btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ShowDeletePopup(view);
+                showDeletePopup(view);
             }
         });
 
     }
 
-    public void ShowEmailPopup(View view){
+    public void showEmailPopup(View view){
         Button btnModifyEmail;
         EditText edtCurrentEmail, edtNewEmail, edtConfirmNewEmail, edtPassword;
 
-        ModifyEmail.setContentView(R.layout.popup_alteraremail);
+        EditEmail.setContentView(R.layout.popup_alteraremail);
 
-        edtCurrentEmail = ModifyEmail.findViewById(R.id.edtCurrentEmail);
-        btnModifyEmail = ModifyEmail.findViewById(R.id.btnModifyEmail);
-        edtNewEmail = ModifyEmail.findViewById(R.id.edtNewEmail);
-        edtConfirmNewEmail = ModifyEmail.findViewById(R.id.edtConfirmNewEmail);
-        edtPassword = ModifyEmail.findViewById(R.id.edtPassword);
+        edtCurrentEmail = EditEmail.findViewById(R.id.edtCurrentEmail);
+        btnModifyEmail = EditEmail.findViewById(R.id.btnModifyEmail);
+        edtNewEmail = EditEmail.findViewById(R.id.edtNewEmail);
+        edtConfirmNewEmail = EditEmail.findViewById(R.id.edtConfirmNewEmail);
+        edtPassword = EditEmail.findViewById(R.id.edtPassword);
 
 
-        ModifyEmail.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        ModifyEmail.show();
+        EditEmail.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        EditEmail.show();
     }
 
-    public void ShowPasswordPopup(View view) {
+    public void showPasswordPopup(View view) {
         Button btnModifyPassword;
         EditText edtCurrentPassword, edtNewPassword, edtConfirmNewPassword;
 
-        ModifyPassword.setContentView(R.layout.popup_alterarsenha);
+        EditPassword.setContentView(R.layout.popup_alterarsenha);
 
-        btnModifyPassword = ModifyPassword.findViewById(R.id.btnModifyPassword);
-        edtCurrentPassword = ModifyPassword.findViewById(R.id.edtCurrentPassword);
-        edtNewPassword = ModifyPassword.findViewById(R.id.edtNewPassword);
-        edtConfirmNewPassword = ModifyPassword.findViewById(R.id.edtConfirmNewPassword);
+        btnModifyPassword = EditPassword.findViewById(R.id.btnModifyPassword);
+        edtCurrentPassword = EditPassword.findViewById(R.id.edtCurrentPassword);
+        edtNewPassword = EditPassword.findViewById(R.id.edtNewPassword);
+        edtConfirmNewPassword = EditPassword.findViewById(R.id.edtConfirmNewPassword);
 
-        ModifyPassword.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        ModifyPassword.show();
+        EditPassword.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        EditPassword.show();
     }
-    public void ShowDeletePopup(View view) {
+    public void showDeletePopup(View view) {
         EditText edtEmail, edtPassword, edtConfirmPassword;
         Button btnDeleteAccountPopUp;
 
@@ -103,7 +103,7 @@ public class Perfil extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 DeleteAccount.dismiss();
-                ShowWarningPopup();
+                showWarningPopup();
             }
         });
 
@@ -112,7 +112,7 @@ public class Perfil extends FragmentActivity {
 
     }
 
-    public void ShowWarningPopup() {
+    public void showWarningPopup() {
         Button btnReturn, btnConfirm;
 
         Warning.setContentView(R.layout.popup_aviso);

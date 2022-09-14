@@ -112,7 +112,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnModifyEmail"
+        android:id="@+id/btnEditEmail"
         android:layout_width="375dp"
         android:layout_height="50dp"
         android:layout_marginTop="352dp"
@@ -131,7 +131,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnModifyPassword"
+        android:id="@+id/btnEditPassword"
         android:layout_width="375dp"
         android:layout_height="50dp"
         android:layout_marginTop="416dp"
@@ -169,7 +169,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imgModifyPic"
+        android:id="@+id/imgEditPic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="224dp"

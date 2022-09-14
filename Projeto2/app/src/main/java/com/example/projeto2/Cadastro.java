@@ -151,7 +151,7 @@ public class Cadastro extends AppCompatActivity {
 
 
                         }
-                    },2000);
+                    },1000);
 
                 }else {
                     String erro;
