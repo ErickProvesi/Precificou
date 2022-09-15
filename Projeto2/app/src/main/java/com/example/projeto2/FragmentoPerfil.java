@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -21,7 +22,7 @@ import androidx.fragment.app.FragmentActivity;
 
 public class FragmentoPerfil extends Fragment {
 
-    private  Dialog EditEmail;
+    private Dialog EditEmail, EditPassword, DeleteAccount, Warning;
 
     @Nullable
     @Override
@@ -31,8 +32,12 @@ public class FragmentoPerfil extends Fragment {
         Button btnEditEmail = view.findViewById(R.id.btnEditEmail);
         Button btnEditPassword = view.findViewById(R.id.btnEditPassword);
         Button btnDeleteAccount = view.findViewById(R.id.btnDeleteAccount);
+        ImageView imgProfilePic = view.findViewById(R.id.imgProfilePic);
 
         EditEmail = new Dialog(getActivity());
+        EditPassword = new Dialog(getActivity());
+        DeleteAccount = new Dialog(getActivity());
+        Warning = new Dialog(getActivity());
 
         btnEditEmail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,9 +46,21 @@ public class FragmentoPerfil extends Fragment {
             }
         });
 
+        btnEditPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPasswordPopup(view);
+            }
+        });
+
+        btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDeletePopup(view);
+            }
+        });
 
         return view;
-
 
     }
     public void showEmailPopup(View view){
@@ -61,6 +78,58 @@ public class FragmentoPerfil extends Fragment {
 
         EditEmail.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         EditEmail.show();
+    }
+
+    public void showPasswordPopup(View view) {
+        Button btnModifyPassword;
+        EditText edtCurrentPassword, edtNewPassword, edtConfirmNewPassword;
+
+        EditPassword.setContentView(R.layout.popup_alterarsenha);
+
+        btnModifyPassword = EditPassword.findViewById(R.id.btnModifyPassword);
+        edtCurrentPassword = EditPassword.findViewById(R.id.edtCurrentPassword);
+        edtNewPassword = EditPassword.findViewById(R.id.edtNewPassword);
+        edtConfirmNewPassword = EditPassword.findViewById(R.id.edtConfirmNewPassword);
+
+        EditPassword.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        EditPassword.show();
+    }
+
+    public void showDeletePopup(View view) {
+        EditText edtEmail, edtPassword, edtConfirmPassword;
+        Button btnDeleteAccountPopUp;
+
+        DeleteAccount.setContentView(R.layout.popup_excluirconta);
+
+        edtEmail = DeleteAccount.findViewById(R.id.edtEmail);
+        edtPassword = DeleteAccount.findViewById(R.id.edtPassword);
+        edtConfirmPassword = DeleteAccount.findViewById(R.id.edtConfirmPassword);
+        btnDeleteAccountPopUp = DeleteAccount.findViewById(R.id.btnDeleteAccountPopUp);
+
+        btnDeleteAccountPopUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DeleteAccount.dismiss();
+                showWarningPopup();
+            }
+        });
+
+        DeleteAccount.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        DeleteAccount.show();
+
+    }
+
+    public void showWarningPopup() {
+        Button btnReturn, btnConfirm;
+
+        Warning.setContentView(R.layout.popup_aviso);
+
+        btnReturn = Warning.findViewById(R.id.btnReturn);
+        btnConfirm = Warning.findViewById(R.id.btnConfirm);
+
+        Warning.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        Warning.show();
+
     }
 
 }
