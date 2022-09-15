@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
@@ -28,7 +28,7 @@
         android:id="@+id/edtUsageTime"
         android:layout_width="307dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/custom_edit_text"
         android:fontFamily="@font/poppinssemibold"
@@ -39,15 +39,14 @@
         android:textColorHint="@color/hintColor"
         android:textSize="15dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.150"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/txtCalculateGas" />
 
     <EditText
         android:id="@+id/edtBurnerConsumption"
         android:layout_width="307dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/custom_edit_text"
         android:fontFamily="@font/poppinssemibold"
@@ -58,15 +57,26 @@
         android:textColorHint="@color/hintColor"
         android:textSize="15dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.150"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/edtUsageTime" />
+
+    <ImageView
+        android:id="@+id/imgInterrogacao"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/interrogacao"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.934"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.405" />
 
     <EditText
         android:id="@+id/edtCylinderCapacity"
         android:layout_width="307dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/custom_edit_text"
         android:fontFamily="@font/poppinssemibold"
@@ -77,15 +87,26 @@
         android:textColorHint="@color/hintColor"
         android:textSize="15dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.150"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/edtBurnerConsumption" />
+
+    <ImageView
+        android:id="@+id/imgInterrogacao2"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/interrogacao"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.934"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.593" />
 
     <EditText
         android:id="@+id/edtGasPrice"
         android:layout_width="307dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/custom_edit_text"
         android:fontFamily="@font/poppinssemibold"
@@ -96,24 +117,24 @@
         android:textColorHint="@color/hintColor"
         android:textSize="15dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.150"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/edtCylinderCapacity" />
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="100dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/custom_button"
         android:fontFamily="@font/poppinsextrabold"
         android:text="Salvar"
-        android:textSize="13dp"
         android:textColor="@color/black"
+        android:textSize="13dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.886"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtGasPrice"
+        />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

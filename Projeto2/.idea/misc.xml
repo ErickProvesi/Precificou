@@ -58,7 +58,10 @@
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_outroscustos.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_qtdingrediente.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/menu/menu.xml" value="0.36666666666666664" />
+        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/drawable/ic_baseline_help_center_24.xml" value="0.2215" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/drawable/ic_iconeadicionar.xml" value="0.2215" />
+        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/drawable/ic_interrogação_background.xml" value="0.2215" />
+        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/activity_meus_ingredientes.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.22402736212056434" />
@@ -76,7 +79,8 @@
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_alterarsenha.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_aviso.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_combustivel.xml" value="0.22402736212056434" />
-        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_energiaeletrica.xml" value="0.22402736212056434" />
+        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_criaringrediente.xml" value="0.22402736212056434" />
+        <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_energiaeletrica.xml" value="0.2" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_excluirconta.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_gas.xml" value="0.22402736212056434" />
         <entry key="..\:/Users/moc/Documents/GitHub/Precificou/Projeto2/app/src/main/res/layout/popup_outroscustos.xml" value="0.22402736212056434" />
