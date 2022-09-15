@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:layout_width="323dp"
-    android:layout_height="564dp"
+    android:layout_width="370dp"
+    android:layout_height="690dp"
     android:background="@drawable/popup_background"
     android:padding="5dp"
     android:layout_gravity="center"
@@ -22,27 +22,40 @@
         />
 
     <SearchView
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:id="@+id/schMyIngredient"
+        android:layout_width="350dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/custom_search"
-        android:layout_marginTop="20dp"
+        android:queryHint="Pesquisar Produtos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <Button
-        android:layout_width="match_parent"
+        android:id="@+id/btnCreate"
+        android:layout_width="350dp"
         android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
         android:background="@drawable/custom_button"
-        android:layout_marginTop="5dp"
+        android:drawableTop="@drawable/ic_iconeadicionar"
         />
 
     <Button
-        android:layout_width="70dp"
-        android:layout_height="30dp"
-        android:background="@drawable/custom_button"
+        android:id="@+id/btnSave"
+        android:layout_width="120dp"
+        android:layout_height="36dp"
         android:layout_gravity="center"
-        android:layout_marginTop="370dp"
-        android:text="OK"
-        android:fontFamily="@font/poppinssemibold"
+        android:layout_marginTop="470dp"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsextrabold"
+        android:text="Salvar"
+        android:textAlignment="center"
         android:textColor="@color/black"
+        android:textSize="12sp"
         />
+
 </LinearLayout>
+

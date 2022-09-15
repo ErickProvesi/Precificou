@@ -18,6 +18,7 @@ public class ViewPager extends FragmentActivity {
     private FragmentStateAdapter pagerAdapter;
     private ViewPager2 vpgViewPager;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
