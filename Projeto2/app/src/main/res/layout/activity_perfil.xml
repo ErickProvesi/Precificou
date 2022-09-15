@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#222222"
-    tools:context=".Perfil">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:clickable="true"
+    tools:context=".FragmentoPerfil">
 
     <TextView
         android:id="@+id/txtProfile"
@@ -30,25 +27,26 @@
         android:layout_width="fill_parent"
         android:layout_height="650dp"
         android:background="@drawable/view_products"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="82dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnQuitAccount"
-        android:layout_width="375dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="552dp"
-        android:backgroundTint="#6B6B6B"
-        android:drawableRight="@drawable/right_arrow"
+        android:layout_width="360dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="622dp"
+        android:background="@drawable/custom_button_profile"
         android:fontFamily="@font/poppinsbold"
         android:gravity="left"
-        android:paddingTop="9dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:text="Sair"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.222"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -56,27 +54,10 @@
         android:id="@+id/imgProfilePic"
         android:layout_width="145dp"
         android:layout_height="143dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="170dp"
+        android:background="@drawable/pic_circle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.03"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/pic_circle" />
-
-    <TextView
-        android:id="@+id/txtNameProfile"
-        android:layout_width="220dp"
-        android:layout_height="33dp"
-        android:layout_marginTop="136dp"
-        android:background="@drawable/custom_text_profile"
-        android:drawableRight="@drawable/edit_icon"
-        android:fontFamily="@font/poppinsbold"
-        android:paddingRight="5dp"
-        android:text="Nome Usuario"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.963"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -84,9 +65,8 @@
         android:id="@+id/txtEmailProfile"
         android:layout_width="220dp"
         android:layout_height="33dp"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="250dp"
         android:background="@drawable/custom_text_profile"
-        android:drawableRight="@drawable/edit_icon"
         android:fontFamily="@font/poppinsbold"
         android:paddingRight="5dp"
         android:text="E-mail Usuario"
@@ -101,7 +81,7 @@
         android:id="@+id/txtAccountSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="370dp"
         android:fontFamily="@font/poppinsbold"
         android:text="Configurações da Conta"
         android:textColor="#FFFFFF"
@@ -113,58 +93,55 @@
 
     <Button
         android:id="@+id/btnEditEmail"
-        android:layout_width="375dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="352dp"
-        android:backgroundTint="#6B6B6B"
-        android:drawableRight="@drawable/right_arrow"
+        android:layout_width="360dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="422dp"
+        android:background="@drawable/custom_button_profile"
         android:fontFamily="@font/poppinsbold"
         android:gravity="left"
-        android:paddingTop="9dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:text="Alterar E-mail"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.222"
+        app:layout_constraintHorizontal_bias="0.45"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnEditPassword"
-        android:layout_width="375dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="416dp"
-        android:backgroundTint="#6B6B6B"
-        android:drawableRight="@drawable/right_arrow"
+        android:layout_width="360dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="486dp"
+        android:background="@drawable/custom_button_profile"
         android:fontFamily="@font/poppinsbold"
         android:gravity="left"
-        android:paddingTop="9dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:text="Alterar Senha"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.21"
+        app:layout_constraintHorizontal_bias="0.45"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnDeleteAccount"
-        android:layout_width="375dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="483dp"
-        android:backgroundTint="#6B6B6B"
-        android:drawableRight="@drawable/right_arrow"
+        android:layout_width="360dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="553dp"
+        android:background="@drawable/custom_button_profile"
         android:fontFamily="@font/poppinsbold"
         android:gravity="left"
-        android:paddingTop="9dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="10dp"
         android:text="Excluir Conta"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
-        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.222"
+        app:layout_constraintHorizontal_bias="0.45"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -172,11 +149,50 @@
         android:id="@+id/imgEditPic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="224dp"
+        android:layout_marginTop="294dp"
+        android:background="@drawable/edit_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.343"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/edit_icon" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edtProfileName"
+        android:layout_width="220dp"
+        android:layout_height="33dp"
+        android:layout_marginTop="207dp"
+        android:background="@drawable/custom_text_profile"
+        android:ems="10"
+        android:fontFamily="@font/poppinsbold"
+        android:inputType="textPersonName"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.963"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgEditName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="215dp"
+        android:src="@drawable/edit_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.959"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgProfileCheck"
+        android:layout_width="19dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="214dp"
+        android:src="@drawable/vetor_check"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.961"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
