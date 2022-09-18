@@ -38,29 +38,16 @@ public class ViewPager extends FragmentActivity {
         @NotNull
         @Override
         public Fragment createFragment(int position) {
-            int op = 0;
             switch(position){
 
                 case 0:
-                    op = 0;
-                    break;
+                    return new FragmentoPerfil();
                 case 1:
-                    op = 1;
-                    break;
+                    return new FragmentoProduto();
                 case 2:
-                    op = 2;
-                    break;
+                    return new FragmentoMeusIngredientes();
                 default:
                     return null;
-            }
-            if(op == 0){
-                return new FragmentoPerfil();
-
-            }else if (op == 1){
-                return new FragmentoProduto();
-
-            }else {
-                return new FragmentoMeusIngredientes();
             }
         }
 

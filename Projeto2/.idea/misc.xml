@@ -16,6 +16,7 @@
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.12" />
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.125" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.188" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/custom_button_profile.xml" value="0.185" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.188" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.22" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
@@ -23,8 +24,9 @@
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.33" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.25" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_splash.xml" value="0.278125" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.20833333333333334" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.209375" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.25" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionaringrediente.xml" value="0.209375" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.67" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_alteraremail.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_alterarsenha.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_aviso.xml" value="0.209375" />
@@ -36,12 +38,13 @@
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_text_profile.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/pic_circle.xml" value="0.3665" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.3675" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/vetor_check.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/view_products.xml" value="0.3665" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_meus_ingredientes.xml" value="0.3625" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.1" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.4586319218241042" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_view_pager.xml" value="0.3625" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.22282608695652173" />

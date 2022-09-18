@@ -36,8 +36,6 @@ import java.util.UUID;
 public class Principal extends FragmentActivity {
 
     FloatingActionButton btnAddProduct;
-    private Button btnBackLogin, btnGoProfile;
-    public static int voltou = 0;
     private Dialog addProduct;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String userID;
@@ -50,18 +48,8 @@ public class Principal extends FragmentActivity {
 
         addProduct = new Dialog(this);
 
-        voltou = 0;
-
-        btnBackLogin = findViewById(R.id.btnBackLogin);
         btnAddProduct = findViewById(R.id.btnAddProduct);
-        btnGoProfile = findViewById(R.id.btnGoProfile);
 
-        btnBackLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                returnLogin();
-            }
-        });
 
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,20 +57,6 @@ public class Principal extends FragmentActivity {
                 showPopup(view);
             }
         });
-
-        btnGoProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                goProfile();
-            }
-        });
-
-    }
-    private void returnLogin() {
-        voltou++;
-        Intent voltarLogin = new Intent(Principal.this, Login.class);
-        startActivity(voltarLogin);
-        finish();
 
     }
     public void showPopup(View view) {
@@ -142,11 +116,4 @@ public class Principal extends FragmentActivity {
         addProduct.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addProduct.show();
     }
-
-    private void goProfile() {
-        Intent intent = new Intent(Principal.this, Perfil.class);
-        startActivity(intent);
-    }
-
-
 }
