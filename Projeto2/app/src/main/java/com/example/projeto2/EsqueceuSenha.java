@@ -37,17 +37,17 @@ public class EsqueceuSenha extends AppCompatActivity {
 
         mauth = FirebaseAuth.getInstance();
 
-        imgBackRecover.setOnClickListener(view -> backToLoginScreen());
+        imgBackRecover.setOnClickListener(view -> BackToLoginScreen());
 
         btnSendRecover.setOnClickListener(view -> {
-            recoverPassword(view);
+            RecoverPassword(view);
     });
     }
-    private void backToLoginScreen() {
+    private void BackToLoginScreen() {
         Intent LoginScreen = new Intent(EsqueceuSenha.this, Login.class);
         startActivity(LoginScreen);
     }
-    private void recoverPassword(View view){
+    private void RecoverPassword(View view){
 
         String email = edtEmailRecover.getText().toString();
 

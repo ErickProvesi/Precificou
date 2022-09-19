@@ -33,9 +33,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Principal extends FragmentActivity {
+public class Principal extends AppCompatActivity {
 
     FloatingActionButton btnAddProduct;
+    private Button btnBackLogin, btnGoProfile;
+    public static int voltou = 0;
     private Dialog addProduct;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String userID;
@@ -46,20 +48,48 @@ public class Principal extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_principal);
 
+
         addProduct = new Dialog(this);
 
-        btnAddProduct = findViewById(R.id.btnAddProduct);
 
+        voltou = 0;
+
+        btnBackLogin = findViewById(R.id.btnBackLogin);
+        btnAddProduct = findViewById(R.id.btnAddProduct);
+        btnGoProfile = findViewById(R.id.btnGoProfile);
+
+
+
+        btnBackLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                VoltarLogin();
+            }
+        });
 
         btnAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopup(view);
+                ShowPopup(view);
+            }
+        });
+
+        btnGoProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                GoProfile();
             }
         });
 
     }
-    public void showPopup(View view) {
+    private void VoltarLogin() {
+        voltou++;
+        Intent voltarLogin = new Intent(Principal.this, Login.class);
+        startActivity(voltarLogin);
+        finish();
+
+    }
+    public void ShowPopup(View view) {
 
         Button btnSaveProduct;
         EditText edtNameProduct;
@@ -116,4 +146,11 @@ public class Principal extends FragmentActivity {
         addProduct.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addProduct.show();
     }
+
+    private void GoProfile() {
+        Intent intent = new Intent(Principal.this, Perfil.class);
+        startActivity(intent);
+    }
+
+
 }

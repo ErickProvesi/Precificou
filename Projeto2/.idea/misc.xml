@@ -3,6 +3,13 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/button_details.xml" value="0.2645" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/button_income.xml" value="0.265" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/card_values_product_details.xml" value="0.265" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/img_product_photo.xml" value="0.2015" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.2609375" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_perfil_produto_detalhes.xml" value="0.25" />
+        <entry key="..\:/Users/entra21/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_perfil_produto_receita.xml" value="0.33" />
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.125" />
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_button_pointer.xml" value="0.125" />
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/drawable/custom_edit_text.xml" value="0.125" />
@@ -16,7 +23,6 @@
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.12" />
         <entry key="..\:/Users/erick/AndroidStudioProjects/Projeto2/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.125" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.188" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/custom_button_profile.xml" value="0.185" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.188" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.22" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
@@ -24,34 +30,50 @@
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.33" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.25" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/activity_splash.xml" value="0.278125" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.25" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionaringrediente.xml" value="0.209375" />
-        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.67" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.20833333333333334" />
+        <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_alteraremail.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_alterarsenha.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_aviso.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/popup_excluirconta.xml" value="0.209375" />
         <entry key="..\:/Users/erick/Downloads/Projeto2/app/src/main/res/layout/splash.xml" value="0.278125" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.172" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/custom_search.xml" value="0.172" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.2185" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/ic_twotone_arrow_drop_down_24.xml" value="0.24" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/img_product_photo.xml" value="0.22" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/line_product_screen.xml" value="0.164" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.1495" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/drawable/view_product.xml" value="0.261" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.5" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_perfil_produto_detalhes.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_perfil_produto_receita.xml" value="0.33" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_splash.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/activity_view_pager.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/popup_alteraremail.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/popup_alterarsenha.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/popup_aviso.xml" value="0.27291666666666664" />
+        <entry key="..\:/Users/moc/Desktop/Precificou-main/Projeto2/app/src/main/res/layout/popup_excluirconta.xml" value="0.27291666666666664" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_button.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_edit_text.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_search.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/custom_text_profile.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/pic_circle.xml" value="0.3665" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/popup_background.xml" value="0.3675" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/vetor_check.xml" value="0.3675" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/drawable/view_products.xml" value="0.3665" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_cadastro.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_esqueceu_senha.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_login.xml" value="0.33" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_meus_ingredientes.xml" value="0.3625" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.4586319218241042" />
+        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_perfil.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_principal.xml" value="0.33" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/activity_view_pager.xml" value="0.3625" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/custom_popup.xml" value="0.22282608695652173" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/fragment_fragmento_perfil2.xml" value="0.3625" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_adicionaringrediente.xml" value="0.36666666666666664" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_adicionarproduto.xml" value="0.3625" />
-        <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_alteraremail.xml" value="0.3625" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_alterarsenha.xml" value="0.27421875" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_aviso.xml" value="0.30085470085470084" />
         <entry key="..\:/Users/moc/Desktop/Projeto2/app/src/main/res/layout/popup_excluirconta.xml" value="0.365625" />

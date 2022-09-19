@@ -1,6 +1,5 @@
 package com.example.projeto2;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,8 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -129,35 +126,15 @@ public class Login extends AppCompatActivity {
 
     private void LoginGoogle() {
         Intent intent = googleSignInClient.getSignInIntent();
-        //startActivityForResult(intent, 1);
-        openActivity.launch(intent);
+        startActivityForResult(intent, 1);
     }
-
-    ActivityResultLauncher<Intent> openActivity = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent intent = result.getData();
-
-                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
-                    try {
-                        GoogleSignInAccount account = task.getResult(ApiException.class);
-                        loginWithGoogle(account.getIdToken());
-                    }catch (ApiException exception){
-                        Log.d("Erro", exception.toString());
-                    }
-
-                }
-            }
-
-    );
 
     private void loginWithGoogle(String token) {
         AuthCredential credential = GoogleAuthProvider.getCredential(token, null);
         mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()){
                 Toast.makeText(getApplicationContext(), "Login com Google efetuado com sucesso", Toast.LENGTH_SHORT);
-                mainScreen();
+                MainScreen();
             }else {
                 Toast.makeText(getApplicationContext(), "Erro ao efetuar login com Google", Toast.LENGTH_SHORT);
             }
@@ -200,7 +177,7 @@ public class Login extends AppCompatActivity {
     class CustomClickableSpan2 extends ClickableSpan {
 
         public void onClick(View view) {
-            registrationScreen();
+            RegistrationScreen();
         }
     @Override
 
@@ -224,9 +201,11 @@ public class Login extends AppCompatActivity {
                new Handler().postDelayed(() -> {
                    Toast toast = Toast.makeText(getApplicationContext(), "Login efetuado com Sucesso.", Toast.LENGTH_SHORT);
                    toast.show();
-                   mainScreen();
+                   MainScreen();
 
-               },1000);
+               },2000);
+
+
 
             }else {
                 String error;
@@ -256,20 +235,18 @@ public class Login extends AppCompatActivity {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (currentUser != null) {
-            mainScreen();
+        if (currentUser != null && Principal.voltou == 0) {
+            MainScreen();
         }
 
         //Métodos Intent
     }
-
-    private void mainScreen() {
+    private void MainScreen() {
         Intent Gomain = new Intent(Login.this, ViewPager.class);
         startActivity(Gomain);
         finish();
     }
-
-    private void registrationScreen() {
+    private void RegistrationScreen() {
         Intent GoRegister = new Intent(Login.this, Cadastro.class);
         startActivity(GoRegister);
         finish();
