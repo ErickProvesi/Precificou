@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="400dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtModifyEmail"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:textColor="@color/white"
+        android:text="Alterar E-mail"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:layout_marginTop="10dp"
+        />
+
+    <EditText
+        android:inputType="textEmailAddress"
+        android:id="@+id/edtCurrentEmail"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="22dp"
+        android:paddingLeft="10dp"
+        android:background="@drawable/custom_edit_text"
+        android:hint="Informe o E-mail atual"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="18dp"
+        android:textColorHint="@color/hintColor"
+        android:textColor="@color/black"
+        />
+
+    <EditText
+        android:inputType="textEmailAddress"
+        android:id="@+id/edtNewEmail"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:paddingLeft="10dp"
+        android:background="@drawable/custom_edit_text"
+        android:hint="Informe o novo E-mail"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="18dp"
+        android:textColorHint="@color/hintColor"
+        android:textColor="@color/black"
+        />
+
+    <EditText
+        android:inputType="textEmailAddress"
+        android:id="@+id/edtConfirmNewEmail"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:paddingLeft="10dp"
+        android:background="@drawable/custom_edit_text"
+        android:hint="Confirme o novo E-mail"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="18dp"
+        android:textColorHint="@color/hintColor"
+        android:textColor="@color/black"
+        />
+
+    <EditText
+        android:inputType="textPassword"
+        android:id="@+id/edtPassword"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:paddingLeft="10dp"
+        android:background="@drawable/custom_edit_text"
+        android:hint="Digite sua Senha"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="18dp"
+        android:textColorHint="@color/hintColor"
+        android:textColor="@color/black"
+        />
+
+    <Button
+        android:id="@+id/btnModifyEmail"
+        android:background="@drawable/custom_button"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:textAlignment="center"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="25dp"
+        android:text="Alterar E-mail"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textColor="@color/black"
+
+        />
+
+</LinearLayout>

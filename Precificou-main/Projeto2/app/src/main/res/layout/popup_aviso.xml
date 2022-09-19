@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="250dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtDeleteAccountPopUp"
+        android:layout_width="300dp"
+        android:layout_height="25dp"
+        android:textColor="@color/white"
+        android:text="Excluir Conta"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textAlignment="center"
+        android:textSize="20dp"
+        android:layout_marginTop="5dp"
+        />
+
+    <TextView
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:fontFamily="@font/poppinsbold"
+        android:text="Ao excluir sua conta, todos os seus dados serão apagados permanentemente. Para entrar no app novamente, uma nova conta deverá ser criada."
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:paddingLeft="10dp"
+        android:layout_marginTop="20dp"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/btnReturn"
+        android:layout_marginTop="10dp"
+        android:layout_width="120dp"
+        android:layout_marginLeft="15dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsextrabold"
+        android:text="Voltar"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textColor="@color/black"
+
+        />
+
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="120dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/custom_button"
+        android:fontFamily="@font/poppinsextrabold"
+        android:text="Confirmar"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+
+        />
+    </LinearLayout>
+</LinearLayout>
+
