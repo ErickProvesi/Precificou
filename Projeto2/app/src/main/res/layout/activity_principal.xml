@@ -8,26 +8,12 @@
     android:background="#222222"
     tools:context=".Principal">
 
-    <Button
-        android:id="@+id/btnBackLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#FEE101"
-        android:text="Voltar Login"
-        android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.519" />
-
     <TextView
         android:id="@+id/txtProducts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:fontFamily="@font/poppinsextrabold"
         android:letterSpacing="0.2"
         android:text="Produtos"
@@ -50,7 +36,7 @@
         app:srcCompat="@drawable/iconeadicionar" />
 
     <SearchView
-        android:id="@+id/schMyProducts"
+        android:id="@+id/schMyIngredients"
         android:layout_width="300dp"
         android:layout_height="33dp"
         android:layout_marginStart="4dp"
@@ -73,7 +59,7 @@
         app:iconGravity="top"
         app:iconSize="18dp"
         app:iconTint="#000000"
-        app:layout_constraintStart_toEndOf="@+id/schMyProducts"
+        app:layout_constraintStart_toEndOf="@+id/schMyIngredients"
         app:layout_constraintTop_toTopOf="parent" />
 
     <View
@@ -84,17 +70,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnGoProfile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="272dp"
-        android:text="Ir Perfil"
-        android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
