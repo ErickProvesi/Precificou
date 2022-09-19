@@ -94,7 +94,6 @@
         android:layout_gravity="center"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="25dp"
-        android:paddingTop="5dp"
         android:text="Alterar E-mail"
         android:fontFamily="@font/poppinsextrabold"
         android:textColor="@color/black"

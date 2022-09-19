@@ -77,7 +77,6 @@
         android:textAlignment="center"
         android:layout_gravity="center"
         android:layout_marginBottom="20dp"
-        android:paddingTop="5dp"
         android:layout_marginTop="25dp"
         android:text="Alterar Senha"
         android:fontFamily="@font/poppinsextrabold"

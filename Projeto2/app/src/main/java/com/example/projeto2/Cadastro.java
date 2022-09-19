@@ -151,7 +151,7 @@ public class Cadastro extends AppCompatActivity {
 
 
                         }
-                    },1000);
+                    },2000);
 
                 }else {
                     String erro;
@@ -192,7 +192,6 @@ public class Cadastro extends AppCompatActivity {
         users.put("nomeUsuario", nome);
         users.put("idUsuario", userID);
         users.put("fotoUsuario", "");
-        users.put("senhaUsuario", edtPasswordRegister.getText().toString());
 
 
 
