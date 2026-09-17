@@ -8,11 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.method.KeyListener;
@@ -26,7 +24,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -53,12 +50,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 public class FragmentoPerfil extends Fragment {
@@ -156,8 +148,7 @@ public class FragmentoPerfil extends Fragment {
                         personId = acct.getId();
                         personPhoto = acct.getPhotoUrl();
 
-                        Picasso.get().load(personPhoto).into(imgProfilePic);
-                        System.out.println("Executou aqui");
+                        Glide.with(FragmentoPerfil.this).load(personPhoto).into(imgProfilePic);
 
                     } else {
 
