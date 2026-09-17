@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="8dp"
+    android:layout_margin="16dp"
+    style="@style/card_back2"
+    android:id="@+id/card_produto">
+
+    <LinearLayout
+        style="@style/card_back2"
+        android:background="@drawable/card"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imgProductPhoto"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="center"
+            android:background="@drawable/logo_precificou" />
+
+        <TextView
+            android:id="@+id/NameProduct"
+            android:layout_width="140dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginRight="5dp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:fontFamily="@font/poppinsbold"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:gravity="center"
+            >
+            <TextView
+                android:layout_width="26dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="15dp"
+                android:fontFamily="@font/poppinsmedium"
+                android:text="R$"
+                android:textColor="@color/yellow"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/ValueProduct"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="2dp"
+                android:fontFamily="@font/poppinssemibold"
+                android:textColor="@color/yellow"
+                android:textSize="16sp"
+                />
+
+            <ImageView
+                android:id="@+id/DeleteProduct"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginBottom="4dp"
+                android:src="@drawable/trashcard_icon" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+</androidx.cardview.widget.CardView>
+

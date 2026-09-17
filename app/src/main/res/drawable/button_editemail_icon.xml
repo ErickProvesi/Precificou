@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/half_overlay"
+        android:drawable="@drawable/editemail_icon"
+        android:width="25dp"
+        android:height="20dp"
+        android:bottom="6dp"
+        android:right="17dp"
+        />
+
+</layer-list>

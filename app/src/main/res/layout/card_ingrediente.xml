@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="8dp"
+    android:layout_margin="10dp"
+    style="@style/card_back"
+    android:id="@+id/card_ingrediente">
+
+    <LinearLayout
+        style="@style/card_back"
+        android:orientation="horizontal"
+        android:background="@drawable/card"
+        >
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/ingrediente_imagem"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginRight="5dp"
+            />
+
+        <TextView
+            android:id="@+id/NameMyIngredient"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:fontFamily="@font/poppinssemibold"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:paddingTop="18dp"
+            />
+
+        <TextView
+            android:id="@+id/ValueMyIngredient"
+            android:layout_width="80dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="2dp"
+            android:fontFamily="@font/poppinssemibold"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            />
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="1dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginBottom="5dp"
+    style="@style/card_back4"
+    android:id="@+id/iconIngrediente"
+    >
+
+    <TextView
+        android:id="@+id/txtCardNomeIngrediente"
+        style="@style/card_back4"
+        android:fontFamily="@font/poppinssemibold"
+        android:paddingTop="3dp"
+        android:paddingLeft="3dp"
+        android:textColor="@color/white"
+        android:textSize="9sp"
+        android:background="@drawable/card2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.cardview.widget.CardView>

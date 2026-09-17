@@ -1,0 +1,102 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="350dp"
+    android:layout_height="180dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtQuantityIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="5dp"
+        android:text="Insira ou calcule o valor:"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textSize="18dp"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edtEditValueCookingGas"
+            android:layout_width="165dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="16dp"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:layout_gravity="center"
+            android:inputType="numberDecimal"
+            android:hint="Gás"
+            android:fontFamily="@font/poppinssemibold"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hintColor"
+            android:textSize="12sp"
+            android:background="@drawable/custom_edit_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.150"
+            />
+
+        <TextView
+            android:layout_width="25dp"
+            android:layout_height="21dp"
+            android:layout_marginTop="23dp"
+            android:layout_marginLeft="12dp"
+            android:text="ou"
+            android:textSize="16dp"
+            android:textColor="@color/white"
+            />
+
+        <Button
+            android:id="@+id/btnEditCalculateCookingGas"
+            android:layout_width="95dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="8dp"
+            android:paddingTop="5dp"
+            android:layout_gravity="center"
+            android:text="Calcular"
+            android:fontFamily="@font/poppinsbold"
+            android:textSize="10sp"
+            android:textColor="@color/black"
+            android:background="@drawable/custom_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.108"
+            />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnSaveEditCookingGas"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="2dp"
+        android:paddingTop="5dp"
+        android:layout_gravity="center"
+        android:text="Salvar"
+        android:fontFamily="@font/poppinsbold"
+        android:textSize="12sp"
+        android:textColor="@color/black"
+        android:background="@drawable/custom_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.886"
+        />
+
+</LinearLayout>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible"
+    android:fillViewport="true"
+    android:orientation="vertical"
+    tools:context=".Login">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/tela_login__1_"
+        >
+
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="175dp"
+            android:layout_height="220dp"
+            android:layout_marginTop="40dp"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/logo_precificou" />
+
+        <EditText
+            android:id="@+id/edtEmail"
+            android:layout_width="298dp"
+            android:layout_height="43dp"
+            android:layout_marginTop="335dp"
+            android:background="@drawable/custom_edit_text"
+            android:backgroundTint="#FFFFFF"
+            android:elevation="4dp"
+            android:ems="10"
+            android:fontFamily="@font/poppinsmedium"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="10dp"
+            android:textAlignment="viewStart"
+            android:textColor="#BF000000"
+            android:textColorHint="#969696"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.48"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <ImageView
+            android:id="@+id/imgEmailLogin"
+            android:layout_width="34dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="349dp"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.84"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/vetoremail" />
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="298dp"
+            android:layout_height="43dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/custom_edit_text"
+            android:elevation="4dp"
+            android:ems="10"
+            android:fontFamily="@font/poppinsmedium"
+            android:hint="Senha"
+            android:inputType="textPassword"
+            android:paddingLeft="10dp"
+            android:textAlignment="viewStart"
+            android:textColor="#BE000000"
+            android:textColorHint="#969696"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.48"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edtEmail"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <ImageView
+            android:id="@+id/imgEyeLogin"
+            android:layout_width="34dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="428dp"
+            android:elevation="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.84"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/vetorolhofechado" />
+
+        <TextView
+            android:id="@+id/txtForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="460dp"
+            android:fontFamily="@font/poppinsmedium"
+            android:text="Esqueceu a Senha?"
+            android:textAlignment="viewStart"
+            android:textColor="#D2FFFFFF"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.186"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/pgbLogin"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="76dp"
+            android:indeterminateTint="#FEE101"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.311"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtForgotPassword" />
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="90dp"
+            android:layout_height="39dp"
+            android:layout_marginTop="73dp"
+            android:background="@drawable/custom_button"
+            android:backgroundTint="#FEE101"
+            android:drawableTint="#FEE101"
+            android:elevation="4dp"
+            android:fontFamily="@font/poppinsbold"
+            android:letterSpacing="0.2"
+            android:paddingLeft="10dp"
+            android:paddingTop="0dp"
+            android:paddingRight="10dp"
+            android:paddingBottom="0dp"
+            android:text="Logar"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            app:iconTint="#FEE101"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtForgotPassword"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <ImageView
+            android:id="@+id/imgBarLogin2"
+            android:layout_width="150dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="615dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.08"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/linhaou" />
+
+        <TextView
+            android:id="@+id/txtOu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="607dp"
+            android:text="OU"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imgBarLogin"
+            android:layout_width="150dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="615dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.92"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/linhaou" />
+
+        <Button
+            android:id="@+id/btnGoogleLogin"
+            android:layout_width="275dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="650dp"
+            android:backgroundTint="#FFFFFF"
+            android:drawableLeft="@drawable/vetorgoogle__1_"
+            android:elevation="4dp"
+            android:fontFamily="@font/poppinsmedium"
+            android:text="CONTINUAR COM GOOGLE"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/txtGoRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="730dp"
+            android:fontFamily="@font/poppinsbold"
+            android:text="Não possui conta? Clique aqui"
+            android:textColor="#969696"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

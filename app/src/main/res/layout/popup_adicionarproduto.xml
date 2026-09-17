@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="212dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtAddProduct"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Adicionar Produto"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        />
+
+    <EditText
+        android:id="@+id/edtNameProduct"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="22dp"
+        android:layout_gravity="center"
+        android:paddingTop="2dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:inputType="textPersonName"
+        android:hint="Nome Produto"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor"
+        android:background="@drawable/custom_edit_text"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/btnSaveProduct"
+            android:background="@drawable/custom_button"
+            android:layout_width="115dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center"
+            android:paddingTop="5dp"
+            android:layout_marginLeft="100dp"
+            android:text="Salvar"
+            android:fontFamily="@font/poppinsbold"
+            android:textSize="13sp"
+            android:textColor="@color/black"
+            />
+
+        <ProgressBar
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:indeterminateTint="#FEE101"
+
+            android:layout_marginTop="35dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="5dp"
+            style="?android:attr/progressBarStyle"
+            android:id="@+id/pgbAddProduct"
+            android:visibility="invisible"
+            />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="323dp"
+    android:layout_height="300dp"
+    android:background="@drawable/popup_background"
+    android:padding="5dp"
+    android:layout_gravity="center"
+    >
+
+    <TextView
+        android:id="@+id/txtEditIngredient"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:text="Editar Ingrediente"
+        android:fontFamily="@font/poppinsextrabold"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        />
+
+    <EditText
+        android:id="@+id/edtEditNameIngredient"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="22dp"
+        android:background="@drawable/custom_edit_text"
+        android:fontFamily="@font/poppinssemibold"
+        android:hint="Nome do Ingrediente"
+        android:inputType="text"
+        android:paddingTop="2dp"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor"
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edtEditQuantityIngredient"
+            android:layout_width="145dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="16dp"
+            android:paddingTop="2dp"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:layout_gravity="center"
+            android:inputType="number"
+            android:hint="Quantidade"
+            android:fontFamily="@font/poppinssemibold"
+            android:textSize="15dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hintColor"
+            android:background="@drawable/custom_edit_text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.150"
+            />
+
+        <Spinner
+            android:id="@+id/SpinnerEditUnd"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="5dp"
+            android:layout_gravity="center"
+            android:background="@drawable/spinner_und"
+            android:entries="@array/SpinnerUnd"
+            android:paddingRight="8dp"
+            android:paddingTop="2dp"
+            android:theme="@style/spinnerUnd"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.867"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.594" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edtEditIngredientPrice"
+        android:layout_width="280dp"
+        android:layout_height="50dp"
+        android:paddingTop="2dp"
+        android:layout_gravity="center"
+        android:inputType="numberDecimal"
+        android:hint="Preço (R$)"
+        android:fontFamily="@font/poppinssemibold"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/hintColor"
+        android:textAlignment="center"
+        android:background="@drawable/custom_edit_text"
+        />
+
+    <Button
+        android:id="@+id/btnEdit"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:paddingTop="4dp"
+        android:layout_gravity="center"
+        android:text="Salvar"
+        android:fontFamily="@font/poppinsbold"
+        android:textSize="13sp"
+        android:textColor="@color/black"
+        android:textAlignment="center"
+        android:background="@drawable/custom_button"
+        />
+
+</LinearLayout>
