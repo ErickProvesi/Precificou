@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.example.projeto2'
     compileSdk 32
 
     defaultConfig {
