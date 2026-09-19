@@ -3,6 +3,7 @@ package com.example.projeto2;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,34 +66,42 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     }
 
-    public void deleteItem(int position, String ingrediente2 ) {
+    public void deleteItem(int position, String ingrediente2) {
 
+        if (position < 0 || position >= list.size()) {
+            return;
+        }
 
-        db.collection("ListaIngrediente").whereEqualTo("nomeIngrediente", ingrediente2).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        Ingrediente ingrediente = list.get(position);
 
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+        String ingredienteID = ingrediente.getIdIngrediente();
 
+        if (ingredienteID == null || ingredienteID.isEmpty()) {
+            return;
+        }
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
+        db.collection("ListaIngrediente")
+                .document(ingredienteID)
+                .delete()
+                .addOnSuccessListener(unused -> {
 
-                    FragmentoMeusIngredientes.ingredientID = document.getString("idIngrediente");
+                    int index = list.indexOf(ingrediente);
 
-                    db.collection("ListaIngrediente").document(FragmentoMeusIngredientes.ingredientID).delete();
+                    if (index >= 0) {
+                        list.remove(index);
+                        notifyItemRemoved(index);
+                    }
 
+                })
+                .addOnFailureListener(e -> {
 
-                    System.out.print("ID INGREDIENTE" + FragmentoMeusIngredientes.ingredientID);
+                    Log.e(
+                            "MyAdapter",
+                            "Erro ao excluir ingrediente",
+                            e
+                    );
 
-
-                }
-
-
-            }
-
-        });
-        this.list.remove(position);
-        notifyItemChanged(position);
-
+                });
     }
 
     @Override

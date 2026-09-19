@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
@@ -144,48 +146,27 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     @Override
     public void onItemClicked(Produto produto) {
 
-
-        if (MyAdapter2.delete == 0) {
-            Intent intent = new Intent(getActivity(), Perfil_Produto.class);
-            nomeProduto = produto.getNomeProduto();
-
-            db.collection("Produto").whereEqualTo("nomeProduto", produto.getNomeProduto()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-
-                            produtoID = document.getString("idProduto");
-                            System.out.print("ID PRODUTO" + produtoID);
-                        }
-
-                        startActivity(intent);
-                    }
-                }
-
-            });
-        }else {
-            db.collection("Produto").whereEqualTo("nomeProduto", produto.getNomeProduto()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-
-                            produtoID = document.getString("idProduto");
-                            System.out.print("ID PRODUTO" + produtoID);
-                        }
-                    }
-                }
-
-            });
-            System.out.println("POSITION"+MyAdapter2.position2);
-            showConfirmDeletePopup();
-            nomeProduto = produto.getNomeProduto();
+        if (produto == null || produto.getIdProduto() == null) {
+            return;
         }
 
+        produtoID = produto.getIdProduto();
+        nomeProduto = produto.getNomeProduto();
 
+        if (MyAdapter2.delete == 0) {
+
+            Intent intent = new Intent(
+                    requireActivity(),
+                    Perfil_Produto.class
+            );
+
+            startActivity(intent);
+
+        } else {
+
+            showConfirmDeletePopup();
+
+        }
     }
 
     @Override
@@ -355,6 +336,19 @@ public class FragmentoProduto extends Fragment implements SelectListener{
         btnConfirmdeleteProduct = confirmDeleteProduct.findViewById(R.id.btnConfirmDeleteProduct);
         btnReturnDeleteProduct = confirmDeleteProduct.findViewById(R.id.btnReturnDeleteProduct);
 
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(
+                    requireContext(),
+                    "Sua sessão expirou. Faça login novamente.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
         btnReturnDeleteProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -370,15 +364,19 @@ public class FragmentoProduto extends Fragment implements SelectListener{
                 fileRef.delete();
 
 
-                db.collection("ListaIngrediente").whereArrayContains("idProduto", produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                db.collection("ListaIngrediente")
+                        .whereEqualTo(
+                                "idUsuario",
+                                FirebaseAuth.getInstance().getCurrentUser().getUid()
+                        )
+                        .whereArrayContains("idProduto", produtoID)
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
 
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         System.out.println("Executou");
                         for(QueryDocumentSnapshot document : task.getResult()){
-
-                            //Log.i("teste",document.getId());
                             document.getReference().update("idProduto", FieldValue.arrayRemove(produtoID));
                         }
                         list2.remove(MyAdapter2.position2);
@@ -386,7 +384,13 @@ public class FragmentoProduto extends Fragment implements SelectListener{
                     }
                 });
 
-                db.collection("OutrosCustos").whereEqualTo("idProduto", produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                db.collection("OutrosCustos")
+                        .whereEqualTo(
+                                "idUsuario",
+                                FirebaseAuth.getInstance().getCurrentUser().getUid()
+                        )
+                        .whereEqualTo("idProduto", produtoID)
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 

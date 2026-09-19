@@ -1,20 +1,17 @@
 package com.example.projeto2;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -75,27 +72,58 @@ public class MyAdapterOtherCost extends RecyclerView.Adapter<MyAdapterOtherCost.
             cardView1 = itemView.findViewById(R.id.card_outros_custos);
         }
     }
-    public void deleteItemOtherCost(int position, String custo ) {
+    public void deleteItemOtherCost(int position, String custo) {
 
+        if (position < 0 || position >= listOtherCost.size()) {
+            return;
+        }
 
-        db.collection("OutrosCustos").whereEqualTo("nomeCusto", custo).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        OutrosCustos outrosCustos = listOtherCost.get(position);
 
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+        String custoID = outrosCustos.getIdCusto();
 
+        if (custoID == null || custoID.trim().isEmpty()) {
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
+            Log.e("MyAdapterOtherCost", "Custo sem identificador");
 
-                    document.getReference().delete();
+            Toast.makeText(
+                    context,
+                    "Não foi possível identificar o custo",
+                    Toast.LENGTH_SHORT
+            ).show();
 
-                    System.out.print("ID CUSTO" + FragmentoReceita.outroCustoID);
+            return;
+        }
 
-                }
+        db.collection("OutrosCustos")
+                .document(custoID)
+                .delete()
+                .addOnSuccessListener(unused -> {
 
-            }
+                    int index = listOtherCost.indexOf(outrosCustos);
 
-        });
-        this.listOtherCost.remove(position);
-        notifyItemChanged(position);
-}
+                    if (index >= 0) {
+
+                        listOtherCost.remove(index);
+
+                        notifyItemRemoved(index);
+                    }
+
+                })
+                .addOnFailureListener(e -> {
+
+                    Log.e(
+                            "MyAdapterOtherCost",
+                            "Erro ao excluir custo",
+                            e
+                    );
+
+                    Toast.makeText(
+                            context,
+                            "Não foi possível excluir o custo",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                });
+    }
 }

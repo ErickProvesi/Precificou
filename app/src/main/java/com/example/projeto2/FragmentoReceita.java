@@ -33,6 +33,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -184,7 +186,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         EditText edtValueElectricity, edtValueCookingGas, edtValueGasoline;
         EditText edtOtherValues, edtNameOther;
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -569,7 +587,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         EditText edtEditValueElectricity;
         Button btnEditCalculateEletricity,btnSaveEditEletricity;
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -686,7 +720,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         btnEditCalculateGasoline = editGasoline.findViewById(R.id.btnEditCalculateGasoline);
         btnSaveEditGasoline = editGasoline.findViewById(R.id.btnSaveEditGasoline);
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -808,7 +858,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         btnEditCalculateCookingGas = editCookingGas.findViewById(R.id.btnEditCalculateCookingGas);
         btnSaveEditCookingGas = editCookingGas.findViewById(R.id.btnSaveEditCookingGas);
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -928,7 +994,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         Button btnSaveEditOtherCost;
         EditText edtEditOtherValues, edtEditNameOther;
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -991,7 +1073,23 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         Spinner SpinnerTypeQuantity;
         Button btnSaveQtdIng;
 
-        db.collection("Produto").whereEqualTo("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            return;
+        }
+
+        db.collection("Produto")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -1193,7 +1291,19 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
     private void EventChangListerner3() {
 
-        db.collection("ListaIngrediente").whereArrayContains("idProduto", FragmentoProduto.produtoID)
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return;
+        }
+
+        db.collection("ListaIngrediente")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereArrayContains(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -1237,7 +1347,19 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
     private void EventChangListerner2() {
 
-        db.collection("OutrosCustos").whereEqualTo("idProduto", FragmentoProduto.produtoID)
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return;
+        }
+
+        db.collection("OutrosCustos")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereEqualTo(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {

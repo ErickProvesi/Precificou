@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -64,7 +65,16 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
 
         ProdutoIng produtoIng = listProdIng.get(position);
 
-        db.collection("ListaIngrediente").whereArrayContains("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("ListaIngrediente")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereArrayContains(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
 
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -137,8 +147,21 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
 
     public void deleteItemProdIng(int position, String ingredienteProd ) {
 
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return;
+        }
 
-        db.collection("ListaIngrediente").whereArrayContains("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
+        db.collection("ListaIngrediente")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereArrayContains(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
 
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -157,8 +180,21 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
             }
         });
 
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            return;
+        }
 
-        db.collection("ListaIngrediente").whereArrayContains("idProduto", FragmentoProduto.produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
+        db.collection("ListaIngrediente")
+                .whereEqualTo(
+                        "idUsuario",
+                        FirebaseAuth.getInstance().getCurrentUser().getUid()
+                )
+                .whereArrayContains(
+                        "idProduto",
+                        FragmentoProduto.produtoID
+                )
+                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
 
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
