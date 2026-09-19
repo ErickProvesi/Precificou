@@ -52,6 +52,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 public class FragmentoPerfil extends Fragment {
 
@@ -172,13 +175,17 @@ public class FragmentoPerfil extends Fragment {
                 }
             });
 
-        imgEditPic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imgEditPic.setOnClickListener(view2 -> {
 
-                startActivityForResult(intent, 1000);
-            }
+            pickImageLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia
+                                            .ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
+
         });
 
         listener = edtProfileName.getKeyListener();
@@ -291,6 +298,51 @@ public class FragmentoPerfil extends Fragment {
         return view;
 
     }
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.PickVisualMedia(),
+                    uri -> {
+
+                        if (uri == null || !isAdded()) {
+                            return;
+                        }
+
+                        imgUri = uri;
+
+                        try {
+                            Bitmap original = MediaStore.Images.Media.getBitmap(
+                                    requireContext().getContentResolver(),
+                                    imgUri
+                            );
+
+                            ByteArrayOutputStream stream =
+                                    new ByteArrayOutputStream();
+
+                            original.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    30,
+                                    stream
+                            );
+
+                            imgProfilePic.setBackground(null);
+                            imgProfilePic.setImageBitmap(original);
+
+                            imageByte = stream.toByteArray();
+
+                            uploadImageToFirebase(imageByte);
+
+                        } catch (IOException | SecurityException e) {
+                            e.printStackTrace();
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    "Não foi possível carregar a imagem",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
     public void showEmailPopup(View view){
         Button btnModifyEmail;
         EditText edtCurrentEmail, edtNewEmail, edtConfirmNewEmail, edtPassword;
@@ -630,26 +682,6 @@ public class FragmentoPerfil extends Fragment {
             startActivity(intent);
             Login.GoogleLogin = 0;
             getActivity().finish();
-        }
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1000){
-            if (resultCode == Activity.RESULT_OK){
-                imgUri = data.getData();
-                try {
-                    Bitmap original = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(),imgUri);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    original.compress(Bitmap.CompressFormat.JPEG, 30,stream);
-                    imgProfilePic.setBackground(null);
-                    imgProfilePic.setImageBitmap(original);
-                    imageByte = stream.toByteArray();
-                    uploadImageToFirebase(imageByte);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
     private void uploadImageToFirebase(byte[] imageByte) {

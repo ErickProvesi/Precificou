@@ -21,6 +21,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -59,6 +62,48 @@ public class Cadastro extends AppCompatActivity {
 
     private Uri imgUri;
     byte[] imageByte;
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.PickVisualMedia(),
+                    uri -> {
+                        if (uri == null) {
+                            return;
+                        }
+
+                        imgUri = uri;
+
+                        try {
+                            Bitmap original = MediaStore.Images.Media.getBitmap(
+                                    getContentResolver(),
+                                    imgUri
+                            );
+
+                            ByteArrayOutputStream stream =
+                                    new ByteArrayOutputStream();
+
+                            original.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    30,
+                                    stream
+                            );
+
+                            imgProfileRegister.setBackground(null);
+                            imgProfileRegister.setImageBitmap(original);
+
+                            imageByte = stream.toByteArray();
+
+                        } catch (IOException | SecurityException e) {
+                            e.printStackTrace();
+
+                            Toast.makeText(
+                                    Cadastro.this,
+                                    "Não foi possível carregar a imagem",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,14 +158,17 @@ public class Cadastro extends AppCompatActivity {
             }
         });
 
-        imgProfileRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        imgProfileRegister.setOnClickListener(view -> {
 
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickImageLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia
+                                            .ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
 
-                startActivityForResult(intent, 1000);
-            }
         });
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
@@ -255,31 +303,6 @@ public class Cadastro extends AppCompatActivity {
         Intent GoLogin = new Intent(Cadastro.this, Login.class);
         startActivity(GoLogin);
         finish();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 1000){
-            if (resultCode == Activity.RESULT_OK){
-                imgUri = data.getData();
-                try {
-                    Bitmap original = MediaStore.Images.Media.getBitmap(getContentResolver(),imgUri);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    original.compress(Bitmap.CompressFormat.JPEG, 30,stream);
-
-                    imgProfileRegister.setBackground(null);
-                    imgProfileRegister.setImageBitmap(original);
-                    imageByte = stream.toByteArray();
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }
     }
 
     private void uploadImageToFirebase(byte[] imageByte) {

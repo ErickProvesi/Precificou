@@ -39,6 +39,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -140,13 +143,17 @@ public class Perfil_Produto extends AppCompatActivity {
         });
 
 
-        imgEditImageProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imgEditImageProduct.setOnClickListener(view -> {
 
-                startActivityForResult(intent, 1000);
-            }
+            pickImageLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia
+                                            .ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
+
         });
 
 
@@ -226,26 +233,51 @@ public class Perfil_Produto extends AppCompatActivity {
 
     }
 
-        @Override
-        public void onActivityResult ( int requestCode, int resultCode, @Nullable Intent data){
-            super.onActivityResult(requestCode, resultCode, data);
-            if (requestCode == 1000) {
-                if (resultCode == Activity.RESULT_OK) {
-                    imgUri = data.getData();
-                    try {
-                        Bitmap original = MediaStore.Images.Media.getBitmap(Perfil_Produto.this.getContentResolver(), imgUri);
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        original.compress(Bitmap.CompressFormat.JPEG, 15, stream);
-                        imgProductPhoto.setBackground(null);
-                        imgProductPhoto.setImageBitmap(original);
-                        imageByte = stream.toByteArray();
-                        uploadImageToFirebase(imageByte);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.PickVisualMedia(),
+                    uri -> {
+
+                        if (uri == null) {
+                            return;
+                        }
+
+                        imgUri = uri;
+
+                        try {
+                            Bitmap original = MediaStore.Images.Media.getBitmap(
+                                    getContentResolver(),
+                                    imgUri
+                            );
+
+                            ByteArrayOutputStream stream =
+                                    new ByteArrayOutputStream();
+
+                            original.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    15,
+                                    stream
+                            );
+
+                            imgProductPhoto.setBackground(null);
+                            imgProductPhoto.setImageBitmap(original);
+
+                            imageByte = stream.toByteArray();
+
+                            uploadImageToFirebase(imageByte);
+
+                        } catch (IOException | SecurityException e) {
+                            e.printStackTrace();
+
+                            Toast.makeText(
+                                    Perfil_Produto.this,
+                                    "Não foi possível carregar a imagem",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
                     }
-                }
-            }
-        }
+            );
+
         private void uploadImageToFirebase ( byte[] imageByte){
             StorageReference storageReference = mStorage.child(FragmentoProduto.userID + "/Produtos/" + FragmentoProduto.produtoID + ".png");
             storageReference.delete();
