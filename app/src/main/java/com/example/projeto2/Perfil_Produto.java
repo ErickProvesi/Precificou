@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.activity.OnBackPressedCallback;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,7 +18,6 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -62,6 +62,16 @@ public class Perfil_Produto extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil_produto);
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                FragmentoProduto.i = 1;
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
+
         final long ONE_MEGABYTE = 768 * 768;
 
         edtProductName = findViewById(R.id.edtProductName);
@@ -215,14 +225,6 @@ public class Perfil_Produto extends AppCompatActivity {
         transaction.commit();
 
     }
-        @Override
-        public boolean onKeyDown ( int keyCode, KeyEvent event){
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                FragmentoProduto.i = 1;
-                onBackPressed();
-            }
-            return super.onKeyDown(keyCode, event);
-        }
 
         @Override
         public void onActivityResult ( int requestCode, int resultCode, @Nullable Intent data){
