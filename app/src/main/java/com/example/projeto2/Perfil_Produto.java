@@ -34,6 +34,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -56,6 +57,8 @@ public class Perfil_Produto extends AppCompatActivity {
     Uri imgUri;
     byte[] imageByte;
     double total;
+    private ListenerRegistration produtoListener;
+    private DocumentSnapshot produtoAtual;
 
     ImageView imgEditProductName, imgConfirmProducName, imgProductPhoto, imgEditImageProduct;
     Spinner SpinnerUnd;
@@ -85,46 +88,26 @@ public class Perfil_Produto extends AppCompatActivity {
         SpinnerUnd = findViewById(R.id.SpinnerUnd);
         txtUnitOrTotalResult = findViewById(R.id.txtUnitOrTotalResult);
 
-        db.collection("Produto").document(FragmentoProduto.produtoID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-
-                if (documentSnapshot.getDouble("totalIngredientes") == null) {
-
-                } else {
-                    total = ((FragmentoDetalhes.totalProduto * (FragmentoDetalhes.margemLucro / 100)) + FragmentoDetalhes.totalProduto);
-                    if (SpinnerUnd.getSelectedItem().toString().equals("Total")) {
-                        txtUnitOrTotalResult.setText(String.valueOf(total));
-                        System.out.println("aquiiii " + total);
-                    } else {
-                        total = ((FragmentoDetalhes.totalProduto * (FragmentoDetalhes.margemLucro / 100)) + FragmentoDetalhes.totalProduto) / FragmentoDetalhes.rendimento;
-                        txtUnitOrTotalResult.setText(String.valueOf(total));
-                        System.out.println("aquiiii 2 " + total);
+        produtoListener = db.collection("Produto")
+                .document(FragmentoProduto.produtoID)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null) {
+                        Log.e("Perfil_Produto", "Erro ao ler preço", error);
+                        return;
                     }
-                }
-            }
-        });
+                    if (snapshot == null || !snapshot.exists()) return;
+                    produtoAtual = snapshot;
+                    atualizarPrecoExibido();
+                });
 
         SpinnerUnd.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                if (SpinnerUnd.getSelectedItem().toString().equals("Total")) {
-                    total = ((FragmentoDetalhes.totalProduto * (FragmentoDetalhes.margemLucro / 100)) + FragmentoDetalhes.totalProduto);
-                    txtUnitOrTotalResult.setText(String.valueOf(total));
-                    System.out.println("aquiiii " + total);
-
-                } else {
-                    total = ((FragmentoDetalhes.totalProduto * (FragmentoDetalhes.margemLucro / 100)) + FragmentoDetalhes.totalProduto) / FragmentoDetalhes.rendimento;
-                    txtUnitOrTotalResult.setText(String.valueOf(total));
-                    System.out.println("aquiiii 2 " + total);
-                }
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                atualizarPrecoExibido();
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
 
         StorageReference productPhotoReference = mStorage.child(FragmentoProduto.userID + "/" + "Produtos/" + FragmentoProduto.produtoID + ".png");
@@ -231,6 +214,31 @@ public class Perfil_Produto extends AppCompatActivity {
         transaction.replace(R.id.fltPerfilProduto, fragReceita);
         transaction.commit();
 
+    }
+
+    private void atualizarPrecoExibido() {
+        if (produtoAtual == null || txtUnitOrTotalResult == null) return;
+        double ingredientes = PrecoUtils.numero(produtoAtual.getDouble("totalIngredientes"));
+        double outros = PrecoUtils.numero(produtoAtual.getDouble("totalOutrosCustos"));
+        double margem = PrecoUtils.numero(produtoAtual.getDouble("margemLucro"));
+        double rendimento = PrecoUtils.numero(produtoAtual.getDouble("rendimento"));
+        double preco = PrecoUtils.precoFinal(ingredientes, outros, margem);
+        String escolha = SpinnerUnd.getSelectedItem() == null ? "Total" :
+                SpinnerUnd.getSelectedItem().toString();
+        if (!"Total".equals(escolha)) {
+            if (rendimento <= 0) {
+                txtUnitOrTotalResult.setText("Defina o rendimento");
+                return;
+            }
+            preco /= rendimento;
+        }
+        txtUnitOrTotalResult.setText(PrecoUtils.moeda(preco));
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (produtoListener != null) produtoListener.remove();
+        super.onDestroy();
     }
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =

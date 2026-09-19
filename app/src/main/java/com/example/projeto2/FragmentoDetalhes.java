@@ -22,6 +22,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import android.util.Log;
+import android.widget.Toast;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -41,6 +44,7 @@ public class FragmentoDetalhes extends Fragment {
 
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ListenerRegistration produtoListener;
 
     @Nullable
     @Override
@@ -83,44 +87,31 @@ public class FragmentoDetalhes extends Fragment {
             }
         });
 
-        db.collection("Produto").document(FragmentoProduto.produtoID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
+        produtoListener = db.collection("Produto")
+                .document(FragmentoProduto.produtoID)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null) {
+                        Log.e("FragmentoDetalhes", "Falha ao acompanhar o produto", error);
+                        return;
+                    }
+                    if (documentSnapshot == null || !documentSnapshot.exists() || !isAdded()) return;
 
-                if (documentSnapshot.getDouble("totalIngredientes") == null) {
+                    totalIngredientes = PrecoUtils.numero(documentSnapshot.getDouble("totalIngredientes"));
+                    totalOutrosCustos = PrecoUtils.numero(documentSnapshot.getDouble("totalOutrosCustos"));
+                    totalProduto = totalIngredientes + totalOutrosCustos;
+                    rendimento = PrecoUtils.numero(documentSnapshot.getDouble("rendimento"));
+                    margemLucro = PrecoUtils.numero(documentSnapshot.getDouble("margemLucro"));
 
-                }else {
-                    totalIngredientes = documentSnapshot.getDouble("totalIngredientes");
-                    txtValueTotalIngredients.setText("R$ "+df.format(totalIngredientes));
-                }
-                if (documentSnapshot.getDouble("totalOutrosCustos") == null) {
-
-                }else {
-                    totalOutrosCustos = documentSnapshot.getDouble("totalOutrosCustos");
-                    txtValueTotalOtherCost.setText("R$ "+df.format(totalOutrosCustos));
-                }
-                if (documentSnapshot.getDouble("totalIngredientes") == null && documentSnapshot.getDouble("totalOutrosCustos") == null){
-
-                }else {
-                    totalProduto = totalIngredientes+totalOutrosCustos;
-                    txtValueProductCost.setText("R$ "+df.format(totalProduto));
-                }
-                if (documentSnapshot.getDouble("rendimento") == null) {
-
-                }else {
-                    rendimento = documentSnapshot.getDouble("rendimento");
-                    edtRecipeYield.setText((int) (rendimento)+" und");
-                }
-                txtValueProductUnitCost.setText("R$ "+df.format(totalProduto/rendimento));
-                if (documentSnapshot.getDouble("margemLucro") == null) {
-
-                }else {
-                    margemLucro = documentSnapshot.getDouble("margemLucro");
-                    edtProfitMarginPercentage.setText((int) (margemLucro)+" %");
-                }
-                txtValueProfit.setText("R$ "+(df.format(totalProduto*(margemLucro/100))));
-            }
-        });
+                    txtValueTotalIngredients.setText(PrecoUtils.moeda(totalIngredientes));
+                    txtValueTotalOtherCost.setText(PrecoUtils.moeda(totalOutrosCustos));
+                    txtValueProductCost.setText(PrecoUtils.moeda(totalProduto));
+                    txtValueProductUnitCost.setText(rendimento > 0
+                            ? PrecoUtils.moeda(totalProduto / rendimento) : "Defina o rendimento");
+                    edtRecipeYield.setText(rendimento > 0
+                            ? PrecoUtils.edicao(rendimento) + " und" : "Definir rendimento");
+                    edtProfitMarginPercentage.setText(PrecoUtils.edicao(margemLucro) + " %");
+                    txtValueProfit.setText(PrecoUtils.moeda(totalProduto * margemLucro / 100.0));
+                });
 
         return view;
     }
@@ -134,18 +125,20 @@ public class FragmentoDetalhes extends Fragment {
         edtValueRendimento = addRendimento.findViewById(R.id.edtValueRendimento);
         btnSaveRendimento = addRendimento.findViewById(R.id.btnSaveRendimento);
 
-        btnSaveRendimento.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.collection("Produto").document(FragmentoProduto.produtoID).update("rendimento",Double.parseDouble(edtValueRendimento.getText().toString()));
-                addRendimento.dismiss();
-                FragmentoReceita.count2 = 1;
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
-            }
+        btnSaveRendimento.setOnClickListener(view -> {
+            double valor;
+            try { valor = PrecoUtils.parse(edtValueRendimento.getText().toString()); }
+            catch (NumberFormatException e) { edtValueRendimento.setError("Informe um rendimento válido"); return; }
+            if (valor <= 0) { edtValueRendimento.setError("O rendimento deve ser maior que zero"); return; }
+            db.collection("Produto").document(FragmentoProduto.produtoID)
+                    .update("rendimento", valor)
+                    .addOnSuccessListener(unused -> addRendimento.dismiss())
+                    .addOnFailureListener(e -> {
+                        Log.e("FragmentoDetalhes", "Erro ao salvar rendimento", e);
+                        if (isAdded()) Toast.makeText(requireContext(), "Erro ao salvar rendimento", Toast.LENGTH_SHORT).show();
+                    });
         });
+
         addRendimento.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addRendimento.show();
     }
@@ -159,22 +152,29 @@ public class FragmentoDetalhes extends Fragment {
         edtValueMargemLucro = addMargemLucro.findViewById(R.id.edtValueMargemLucro);
         btnSaveMargemLucro = addMargemLucro.findViewById(R.id.btnSaveMargemLucro);
 
-        btnSaveMargemLucro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                db.collection("Produto").document(FragmentoProduto.produtoID).update("margemLucro",Double.parseDouble(edtValueMargemLucro.getText().toString()));
-                addMargemLucro.dismiss();
-                FragmentoReceita.count2 = 1;
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
-            }
+        btnSaveMargemLucro.setOnClickListener(view -> {
+            double valor;
+            try { valor = PrecoUtils.parse(edtValueMargemLucro.getText().toString()); }
+            catch (NumberFormatException e) { edtValueMargemLucro.setError("Informe uma margem válida"); return; }
+            if (valor < 0) { edtValueMargemLucro.setError("A margem não pode ser negativa"); return; }
+            db.collection("Produto").document(FragmentoProduto.produtoID)
+                    .update("margemLucro", valor)
+                    .addOnSuccessListener(unused -> addMargemLucro.dismiss())
+                    .addOnFailureListener(e -> {
+                        Log.e("FragmentoDetalhes", "Erro ao salvar margem", e);
+                        if (isAdded()) Toast.makeText(requireContext(), "Erro ao salvar margem", Toast.LENGTH_SHORT).show();
+                    });
         });
+
 
 
         addMargemLucro.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         addMargemLucro.show();
     }
 
+    @Override
+    public void onDestroyView() {
+        if (produtoListener != null) { produtoListener.remove(); produtoListener = null; }
+        super.onDestroyView();
+    }
 }

@@ -45,7 +45,7 @@ public class MyAdapterOtherCost extends RecyclerView.Adapter<MyAdapterOtherCost.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         OutrosCustos outrosCustos = listOtherCost.get(position);
 
-        holder.txtValueOC1.setText(String.valueOf(outrosCustos.getValorCusto()));
+        holder.txtValueOC1.setText(PrecoUtils.moedaSemSimbolo(outrosCustos.getValorCusto()));
         holder.txtOtherCost1.setText(outrosCustos.getNomeCusto());
 
         holder.cardView1.setOnClickListener(new View.OnClickListener() {
@@ -99,31 +99,20 @@ public class MyAdapterOtherCost extends RecyclerView.Adapter<MyAdapterOtherCost.
                 .document(custoID)
                 .delete()
                 .addOnSuccessListener(unused -> {
-
-                    int index = listOtherCost.indexOf(outrosCustos);
-
-                    if (index >= 0) {
-
-                        listOtherCost.remove(index);
-
-                        notifyItemRemoved(index);
+                    String uid = com.google.firebase.auth.FirebaseAuth.getInstance()
+                            .getCurrentUser() == null ? "" :
+                            com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    String pid = outrosCustos.getIdProduto();
+                    if (!uid.isEmpty() && pid != null) {
+                        PrecificacaoRepository.atualizarOutrosCustos(db, uid, pid)
+                                .addOnFailureListener(e -> Log.e("MyAdapterOtherCost", "Erro ao atualizar total", e));
                     }
-
+                    // A lista é atualizada pelo listener em FragmentoReceita.
                 })
                 .addOnFailureListener(e -> {
-
-                    Log.e(
-                            "MyAdapterOtherCost",
-                            "Erro ao excluir custo",
-                            e
-                    );
-
-                    Toast.makeText(
-                            context,
-                            "Não foi possível excluir o custo",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Log.e("MyAdapterOtherCost", "Erro ao excluir custo", e);
+                    if (position >= 0 && position < listOtherCost.size()) notifyItemChanged(position); // restaura o swipe
+                    Toast.makeText(context, "Não foi possível excluir o custo", Toast.LENGTH_SHORT).show();
                 });
     }
 }

@@ -44,6 +44,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,7 +83,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
     private double usageTime, burnerConsumption, cylinderCapacity, gasPrice;
     private double editusageTime, editburnerConsumption, editcylinderCapacity, editgasPrice;
 
-    private double valueElectricity, valueCookingGas, valueGasoline, otherValues, totalOtherCost,totalOtherCost2;
+    private double valueElectricity, valueCookingGas, valueGasoline, otherValues;
     private double totalIngredientes;
     private double editvalueElectricity, editvalueCookingGas, editvalueGasoline, editotherValues;
 
@@ -94,6 +96,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
     public static int count2=0;
     ArrayList<OutrosCustos> listOtherCost;
     RecyclerView RywOtherCost,RywIngredientProd;
+    private ListenerRegistration custosListener, ingredientesListener;
 
     ArrayList<Ingrediente> listaPesquisa2 = new ArrayList<Ingrediente>();
 
@@ -186,38 +189,10 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         EditText edtValueElectricity, edtValueCookingGas, edtValueGasoline;
         EditText edtOtherValues, edtNameOther;
 
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
-            return;
-        }
-
-        db.collection("Produto")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        if(document.getDouble("totalOutrosCustos") != null){
-                            totalOtherCost = document.getDouble("totalOutrosCustos");
-                        } else{
-                            totalOtherCost = 0;
-                        }
-                    }
-                }
-            }
-        });
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+        final String uid = currentUser.getUid();
+        final String pid = FragmentoProduto.produtoID;
 
         insertOrCalculateValue.setContentView(R.layout.popup_outroscustos);
 
@@ -233,19 +208,19 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         edtNameOther = insertOrCalculateValue.findViewById(R.id.edtNameOther);
 
         if(valueElectricity != 0){
-            edtValueElectricity.setText(String.valueOf(valueElectricity));
+            edtValueElectricity.setText(PrecoUtils.edicao(valueElectricity));
         }
 
         if(valueGasoline!= 0){
-            edtValueGasoline.setText(String.valueOf(valueGasoline));
+            edtValueGasoline.setText(PrecoUtils.edicao(valueGasoline));
         }
 
         if(valueCookingGas != 0){
-            edtValueCookingGas.setText(String.valueOf(valueCookingGas));
+            edtValueCookingGas.setText(PrecoUtils.edicao(valueCookingGas));
         }
 
         if (otherValues != 0){
-            edtOtherValues.setText(String.valueOf(otherValues));
+            edtOtherValues.setText(PrecoUtils.edicao(otherValues));
         }
 
 
@@ -276,91 +251,90 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             }
         });
 
-        btnSaveOtherCost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                if (!edtValueElectricity.getText().toString().isEmpty()) {
-                    valueElectricity = Double.parseDouble(edtValueElectricity.getText().toString());
-
-                    totalOtherCost+= valueElectricity;
-
+        btnSaveOtherCost.setOnClickListener(v -> {
+            WriteBatch batch = db.batch();
+            int adicionados = 0;
+            try {
+                if (!edtValueElectricity.getText().toString().trim().isEmpty()) {
+                    double valor = PrecoUtils.parse(edtValueElectricity.getText().toString());
+                    if (valor < 0) throw new NumberFormatException("Eletricidade negativa");
                     UidElectricity = UUID.randomUUID().toString();
-                    Map<String, Object> eletric = new HashMap<>();
-                    eletric.put("nomeCusto","Eletricidade");
-                    eletric.put("valorCusto",Double.parseDouble(edtValueElectricity.getText().toString()));
-                    eletric.put("idProduto",FragmentoProduto.produtoID);
-                    eletric.put("idUsuario", FragmentoProduto.userID);
-                    eletric.put("idCusto",UidElectricity);
-                    DocumentReference drEletric = db.collection("OutrosCustos").document(UidElectricity);
-                    drEletric.set(eletric);
-
+                    Map<String, Object> custo = new HashMap<>();
+                    custo.put("nomeCusto", "Eletricidade");
+                    custo.put("valorCusto", valor);
+                    custo.put("idProduto", pid);
+                    custo.put("idUsuario", uid);
+                    custo.put("idCusto", UidElectricity);
+                    batch.set(db.collection("OutrosCustos").document(UidElectricity), custo);
+                    adicionados++;
                 }
-
-                if (!edtOtherValues.getText().toString().isEmpty()){
-                    otherValues = Double.parseDouble(edtOtherValues.getText().toString());
-
-                    totalOtherCost+= otherValues;
-
-                    UidOutrosCustos = UUID.randomUUID().toString();
-                    Map<String, Object> other = new HashMap<>();
-                    other.put("nomeCusto",edtNameOther.getText().toString());
-                    other.put("valorCusto",Double.parseDouble(edtOtherValues.getText().toString()));
-                    other.put("idProduto",FragmentoProduto.produtoID);
-                    other.put("idUsuario", FragmentoProduto.userID);
-                    other.put("idCusto",UidOutrosCustos);
-                    DocumentReference drOther = db.collection("OutrosCustos").document(UidOutrosCustos);
-                    drOther.set(other);
-
-                }
-
-                if (!edtValueCookingGas.getText().toString().isEmpty()){
-                    valueCookingGas = Double.parseDouble(edtValueCookingGas.getText().toString());
-
-                    totalOtherCost+= valueCookingGas;
-
+                if (!edtValueCookingGas.getText().toString().trim().isEmpty()) {
+                    double valor = PrecoUtils.parse(edtValueCookingGas.getText().toString());
+                    if (valor < 0) throw new NumberFormatException("Gás negativo");
                     UidCookingGas = UUID.randomUUID().toString();
-                    Map<String, Object> gas = new HashMap<>();
-                    gas.put("nomeCusto","Gás");
-                    gas.put("valorCusto",Double.parseDouble(edtValueCookingGas.getText().toString()));
-                    gas.put("idProduto",FragmentoProduto.produtoID);
-                    gas.put("idUsuario", FragmentoProduto.userID);
-                    gas.put("idCusto",UidCookingGas);
-                    DocumentReference drGas = db.collection("OutrosCustos").document(UidCookingGas);
-                    drGas.set(gas);
-
+                    Map<String, Object> custo = new HashMap<>();
+                    custo.put("nomeCusto", "Gás");
+                    custo.put("valorCusto", valor);
+                    custo.put("idProduto", pid);
+                    custo.put("idUsuario", uid);
+                    custo.put("idCusto", UidCookingGas);
+                    batch.set(db.collection("OutrosCustos").document(UidCookingGas), custo);
+                    adicionados++;
                 }
-
-                if (!edtValueGasoline.getText().toString().isEmpty()){
-                    valueGasoline = Double.parseDouble(edtValueGasoline.getText().toString());
-
-                    totalOtherCost+= valueGasoline;
-
+                if (!edtValueGasoline.getText().toString().trim().isEmpty()) {
+                    double valor = PrecoUtils.parse(edtValueGasoline.getText().toString());
+                    if (valor < 0) throw new NumberFormatException("Gasolina negativa");
                     UidGasoline = UUID.randomUUID().toString();
-                    Map<String, Object> fuel = new HashMap<>();
-                    fuel.put("nomeCusto","Gasolina");
-                    fuel.put("valorCusto",Double.parseDouble(edtValueGasoline.getText().toString()));
-                    fuel.put("idProduto",FragmentoProduto.produtoID);
-                    fuel.put("idUsuario", FragmentoProduto.userID);
-                    fuel.put("idCusto",UidGasoline);
-                    DocumentReference drFuel = db.collection("OutrosCustos").document(UidGasoline);
-                    drFuel.set(fuel);
-
-
+                    Map<String, Object> custo = new HashMap<>();
+                    custo.put("nomeCusto", "Gasolina");
+                    custo.put("valorCusto", valor);
+                    custo.put("idProduto", pid);
+                    custo.put("idUsuario", uid);
+                    custo.put("idCusto", UidGasoline);
+                    batch.set(db.collection("OutrosCustos").document(UidGasoline), custo);
+                    adicionados++;
                 }
-
-                if (totalOtherCost != 0) {
-                    Map<String, Object> totalCost = new HashMap<>();
-                    totalCost.put("totalOutrosCustos",totalOtherCost);
-                    db.collection("Produto").document(FragmentoProduto.produtoID).update(totalCost);
+                if (!edtOtherValues.getText().toString().trim().isEmpty()) {
+                    double valor = PrecoUtils.parse(edtOtherValues.getText().toString());
+                    if (valor < 0) throw new NumberFormatException("Custo negativo");
+                    if (edtNameOther.getText().toString().trim().isEmpty()) {
+                        edtNameOther.setError("Informe o nome do custo");
+                        return;
+                    }
+                    UidOutrosCustos = UUID.randomUUID().toString();
+                    Map<String, Object> custo = new HashMap<>();
+                    custo.put("nomeCusto", edtNameOther.getText().toString().trim());
+                    custo.put("valorCusto", valor);
+                    custo.put("idProduto", pid);
+                    custo.put("idUsuario", uid);
+                    custo.put("idCusto", UidOutrosCustos);
+                    batch.set(db.collection("OutrosCustos").document(UidOutrosCustos), custo);
+                    adicionados++;
                 }
-
-
-
-                insertOrCalculateValue.dismiss();
-
+            } catch (NumberFormatException e) {
+                if (isAdded()) Toast.makeText(requireContext(), "Informe valores monetários válidos e não negativos", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if (adicionados == 0) {
+                if (isAdded()) Toast.makeText(requireContext(), "Informe pelo menos um custo", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            btnSaveOtherCost.setEnabled(false);
+            batch.commit()
+                    .addOnSuccessListener(unused -> {
+                        PrecificacaoRepository.atualizarOutrosCustos(db, uid, pid)
+                                .addOnFailureListener(e -> Log.e("Receita", "Falha ao atualizar soma dos custos", e));
+                        valueElectricity = 0;
+                        valueGasoline = 0;
+                        valueCookingGas = 0;
+                        otherValues = 0;
+                        insertOrCalculateValue.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSaveOtherCost.setEnabled(true);
+                        Log.e("Receita", "Falha ao cadastrar custos", e);
+                        if (isAdded()) Toast.makeText(requireContext(), "Não foi possível salvar os custos", Toast.LENGTH_SHORT).show();
+                    });
         });
         insertOrCalculateValue.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         insertOrCalculateValue.show();
@@ -368,7 +342,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
 
     public void showCalculateElectricityPopup() {
-        EditText edtWorkedHours, edtKwhValues;
+        EditText edtWorkedHours, edtKwhValues, edtPowerWatts;
         Button btnSaveEnergy;
         ImageView imgQuestionMarkElectricity;
 
@@ -376,16 +350,21 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
         edtWorkedHours = calculateElectricity.findViewById(R.id.edtWorkedHours);
         edtKwhValues = calculateElectricity.findViewById(R.id.edtKwhValues);
+        edtPowerWatts = calculateElectricity.findViewById(R.id.edtPowerWatts);
         imgQuestionMarkElectricity = calculateElectricity.findViewById(R.id.imgQuestionMarkEletricity);
         btnSaveEnergy = calculateElectricity.findViewById(R.id.btnSaveEnergy);
         btnSaveEnergy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                workedHours = Double.parseDouble(edtWorkedHours.getText().toString());
-                kwhValues = Double.parseDouble(edtKwhValues.getText().toString());
-
-                valueElectricity = workedHours * kwhValues;
-
+                try {
+                    workedHours = PrecoUtils.parse(edtWorkedHours.getText().toString());
+                    kwhValues = PrecoUtils.parse(edtKwhValues.getText().toString());
+                    double watts = PrecoUtils.parse(edtPowerWatts.getText().toString());
+                    valueElectricity = PrecoUtils.custoEnergia(watts, workedHours, kwhValues);
+                } catch (IllegalArgumentException e) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Preencha tempo, potência (W) e tarifa válida", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 calculateElectricity.dismiss();
                 showInsertOrCalculatePopup();
@@ -426,10 +405,14 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             @Override
             public void onClick(View v) {
 
-                kmTraveled= Double.parseDouble(edtKmTraveled.getText().toString());
-                kmLiter = Double.parseDouble(edtKmLiter.getText().toString());
-                fuelPrice = Double.parseDouble(edtFuelPrice.getText().toString());
+                kmTraveled= PrecoUtils.parse(edtKmTraveled.getText().toString());
+                kmLiter = PrecoUtils.parse(edtKmLiter.getText().toString());
+                fuelPrice = PrecoUtils.parse(edtFuelPrice.getText().toString());
 
+                if (kmLiter <= 0) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Consumo (km/l) deve ser maior que zero", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 valueGasoline = (kmTraveled/kmLiter)*fuelPrice;
 
 
@@ -480,11 +463,15 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             @Override
             public void onClick(View v) {
 
-                usageTime = Double.parseDouble(edtUsageTime.getText().toString());
-                burnerConsumption = Double.parseDouble(edtBurnerConsumption.getText().toString());
-                cylinderCapacity = Double.parseDouble(edtCylinderCapacity.getText().toString());
-                gasPrice = Double.parseDouble(edtGasPrice.getText().toString());
+                usageTime = PrecoUtils.parse(edtUsageTime.getText().toString());
+                burnerConsumption = PrecoUtils.parse(edtBurnerConsumption.getText().toString());
+                cylinderCapacity = PrecoUtils.parse(edtCylinderCapacity.getText().toString());
+                gasPrice = PrecoUtils.parse(edtGasPrice.getText().toString());
 
+                if (cylinderCapacity <= 0) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Capacidade do botijão deve ser maior que zero", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 valueCookingGas = (((usageTime/60) * burnerConsumption)/cylinderCapacity) * gasPrice;
 
 
@@ -587,40 +574,6 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         EditText edtEditValueElectricity;
         Button btnEditCalculateEletricity,btnSaveEditEletricity;
 
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
-            return;
-        }
-
-        db.collection("Produto")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        if(document.getDouble("totalOutrosCustos") != null){
-                            totalOtherCost = document.getDouble("totalOutrosCustos");
-                            totalOtherCost2 = totalOtherCost-editvalueElectricity;
-                        } else{
-                            totalOtherCost2 = 0;
-                        }
-                    }
-                }
-            }
-        });
-
         editElectricity.setContentView(R.layout.popup_edit_energiaeletrica);
 
         edtEditValueElectricity = editElectricity.findViewById(R.id.edtEditValueElectricity);
@@ -629,7 +582,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
 
         if(editvalueElectricity != 0){
-            edtEditValueElectricity.setText(String.valueOf(editvalueElectricity));
+            edtEditValueElectricity.setText(PrecoUtils.edicao(editvalueElectricity));
         }
 
 
@@ -646,22 +599,28 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             public void onClick(View view) {
 
                 if (!edtEditValueElectricity.getText().toString().isEmpty()) {
-                    editvalueElectricity = Double.parseDouble(edtEditValueElectricity.getText().toString());
-
-                    totalOtherCost2+= editvalueElectricity;
-
-                    db.collection("Produto").document(FragmentoProduto.produtoID).update("totalOutrosCustos",totalOtherCost2);
+                    try {
+                    editvalueElectricity = PrecoUtils.parse(edtEditValueElectricity.getText().toString());
+                    } catch (IllegalArgumentException e) {
+                        edtEditValueElectricity.setError("Informe um valor monetário válido");
+                        return;
+                    }
+                    if (editvalueElectricity < 0) {
+                        edtEditValueElectricity.setError("O valor não pode ser negativo");
+                        return;
+                    }
                     Map<String, Object> Electricity = new HashMap<>();
                     Electricity.put("valorCusto",editvalueElectricity);
-                    db.collection("OutrosCustos").document(custoID).update(Electricity);
+                    db.collection("OutrosCustos").document(custoID).update(Electricity)
+                            .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarOutrosCustos(
+                                    db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                    .addOnFailureListener(e -> Log.e("Receita", "Falha ao atualizar custo total", e)))
+                            .addOnFailureListener(e -> Log.e("Receita", "Falha ao editar custo", e));
 
                 }
 
                 editElectricity.dismiss();
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
+
 
             }
         });
@@ -671,7 +630,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
     }
 
     public void showCalculateElectricityPopup2() {
-        EditText edtWorkedHours, edtKwhValues;
+        EditText edtWorkedHours, edtKwhValues, edtPowerWatts;
         Button btnSaveEnergy;
         ImageView imgQuestionMarkElectricity;
 
@@ -679,15 +638,21 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
         edtWorkedHours = calculateElectricity.findViewById(R.id.edtWorkedHours);
         edtKwhValues = calculateElectricity.findViewById(R.id.edtKwhValues);
+        edtPowerWatts = calculateElectricity.findViewById(R.id.edtPowerWatts);
         imgQuestionMarkElectricity = calculateElectricity.findViewById(R.id.imgQuestionMarkEletricity);
         btnSaveEnergy = calculateElectricity.findViewById(R.id.btnSaveEnergy);
         btnSaveEnergy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                editworkedHours= Double.parseDouble(edtWorkedHours.getText().toString());
-                editkwhValues= Double.parseDouble(edtKwhValues.getText().toString());
-
-                editvalueElectricity = editworkedHours * editkwhValues;
+                try {
+                    editworkedHours = PrecoUtils.parse(edtWorkedHours.getText().toString());
+                    editkwhValues = PrecoUtils.parse(edtKwhValues.getText().toString());
+                    double watts = PrecoUtils.parse(edtPowerWatts.getText().toString());
+                    editvalueElectricity = PrecoUtils.custoEnergia(watts, editworkedHours, editkwhValues);
+                } catch (IllegalArgumentException e) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Preencha tempo, potência (W) e tarifa válida", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 calculateElectricity.dismiss();
                 showPopupEditElectricity();
@@ -720,42 +685,9 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         btnEditCalculateGasoline = editGasoline.findViewById(R.id.btnEditCalculateGasoline);
         btnSaveEditGasoline = editGasoline.findViewById(R.id.btnSaveEditGasoline);
 
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
-            return;
-        }
-
-        db.collection("Produto")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        if(document.getDouble("totalOutrosCustos") != null){
-                            totalOtherCost = document.getDouble("totalOutrosCustos");
-                            totalOtherCost2 = totalOtherCost-editvalueGasoline;
-                        } else{
-                            totalOtherCost2 = 0;
-                        }
-                    }
-                }
-            }
-        });
 
         if (editvalueGasoline != 0) {
-            edtEditValueGasoline.setText(String.valueOf(editvalueGasoline));
+            edtEditValueGasoline.setText(PrecoUtils.edicao(editvalueGasoline));
         }
 
 
@@ -773,21 +705,27 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             public void onClick(View view) {
 
                 if (!edtEditValueGasoline.getText().toString().isEmpty()) {
-                    editvalueGasoline = Double.parseDouble(edtEditValueGasoline.getText().toString());
-
-                    totalOtherCost2+= editvalueGasoline;
-
-                    db.collection("Produto").document(FragmentoProduto.produtoID).update("totalOutrosCustos",totalOtherCost2);
+                    try {
+                    editvalueGasoline = PrecoUtils.parse(edtEditValueGasoline.getText().toString());
+                    } catch (IllegalArgumentException e) {
+                        edtEditValueGasoline.setError("Informe um valor monetário válido");
+                        return;
+                    }
+                    if (editvalueGasoline < 0) {
+                        edtEditValueGasoline.setError("O valor não pode ser negativo");
+                        return;
+                    }
                     Map<String, Object> Gasoline = new HashMap<>();
                     Gasoline.put("valorCusto", editvalueGasoline);
-                    db.collection("OutrosCustos").document(custoID).update(Gasoline);
+                    db.collection("OutrosCustos").document(custoID).update(Gasoline)
+                            .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarOutrosCustos(
+                                    db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                    .addOnFailureListener(e -> Log.e("Receita", "Falha ao atualizar custo total", e)))
+                            .addOnFailureListener(e -> Log.e("Receita", "Falha ao editar custo", e));
 
                 }
                 editGasoline.dismiss();
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
+
 
             }
         });
@@ -813,10 +751,14 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             @Override
             public void onClick(View v) {
 
-                editkmTraveled= Double.parseDouble(edtKmTraveled.getText().toString());
-                editkmLiter = Double.parseDouble(edtKmLiter.getText().toString());
-                editfuelPrice = Double.parseDouble(edtFuelPrice.getText().toString());
+                editkmTraveled= PrecoUtils.parse(edtKmTraveled.getText().toString());
+                editkmLiter = PrecoUtils.parse(edtKmLiter.getText().toString());
+                editfuelPrice = PrecoUtils.parse(edtFuelPrice.getText().toString());
 
+                if (editkmLiter <= 0) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Consumo (km/l) deve ser maior que zero", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 editvalueGasoline = (editkmTraveled/editkmLiter)*editfuelPrice;
 
                 calculateGasoline.dismiss();
@@ -858,43 +800,10 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         btnEditCalculateCookingGas = editCookingGas.findViewById(R.id.btnEditCalculateCookingGas);
         btnSaveEditCookingGas = editCookingGas.findViewById(R.id.btnSaveEditCookingGas);
 
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
-            return;
-        }
-
-        db.collection("Produto")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        if(document.getDouble("totalOutrosCustos") != null){
-                            totalOtherCost = document.getDouble("totalOutrosCustos");
-                            totalOtherCost2 = totalOtherCost-editvalueCookingGas;
-                        } else{
-                            totalOtherCost2 = 0;
-                        }
-                    }
-                }
-            }
-        });
 
 
         if(editvalueCookingGas != 0){
-            edtEditValueCookingGas.setText(String.valueOf(editvalueCookingGas));
+            edtEditValueCookingGas.setText(PrecoUtils.edicao(editvalueCookingGas));
         }
 
         btnEditCalculateCookingGas.setOnClickListener(new View.OnClickListener() {
@@ -911,20 +820,26 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             public void onClick(View view) {
 
                 if (!edtEditValueCookingGas.getText().toString().isEmpty()) {
-                    editvalueCookingGas = Double.parseDouble(edtEditValueCookingGas.getText().toString());
-
-                    totalOtherCost2+= editvalueCookingGas;
-
-                    db.collection("Produto").document(FragmentoProduto.produtoID).update("totalOutrosCustos",totalOtherCost2);
+                    try {
+                    editvalueCookingGas = PrecoUtils.parse(edtEditValueCookingGas.getText().toString());
+                    } catch (IllegalArgumentException e) {
+                        edtEditValueCookingGas.setError("Informe um valor monetário válido");
+                        return;
+                    }
+                    if (editvalueCookingGas < 0) {
+                        edtEditValueCookingGas.setError("O valor não pode ser negativo");
+                        return;
+                    }
                     Map<String, Object> CookingGas = new HashMap<>();
                     CookingGas.put("valorCusto",editvalueCookingGas);
-                    db.collection("OutrosCustos").document(custoID).update(CookingGas);
+                    db.collection("OutrosCustos").document(custoID).update(CookingGas)
+                            .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarOutrosCustos(
+                                    db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                    .addOnFailureListener(e -> Log.e("Receita", "Falha ao atualizar custo total", e)))
+                            .addOnFailureListener(e -> Log.e("Receita", "Falha ao editar custo", e));
                 }
                 editCookingGas.dismiss();
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
+
             }
         });
         editCookingGas.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -950,11 +865,15 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             @Override
             public void onClick(View v) {
 
-                editusageTime = Double.parseDouble(edtEditUsageTime.getText().toString());
-                editburnerConsumption = Double.parseDouble(edtEditBurnerConsumption.getText().toString());
-                editcylinderCapacity = Double.parseDouble(edtEditCylinderCapacity.getText().toString());
-                editgasPrice = Double.parseDouble(edtEditGasPrice.getText().toString());
+                editusageTime = PrecoUtils.parse(edtEditUsageTime.getText().toString());
+                editburnerConsumption = PrecoUtils.parse(edtEditBurnerConsumption.getText().toString());
+                editcylinderCapacity = PrecoUtils.parse(edtEditCylinderCapacity.getText().toString());
+                editgasPrice = PrecoUtils.parse(edtEditGasPrice.getText().toString());
 
+                if (editcylinderCapacity <= 0) {
+                    if (isAdded()) Toast.makeText(requireContext(), "Capacidade do botijão deve ser maior que zero", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 editvalueCookingGas = (((editusageTime/60) * editburnerConsumption)/editcylinderCapacity) * editgasPrice;
 
                 calculateCookingGas.dismiss();
@@ -994,40 +913,6 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         Button btnSaveEditOtherCost;
         EditText edtEditOtherValues, edtEditNameOther;
 
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser == null) {
-            return;
-        }
-
-        db.collection("Produto")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        if(document.getDouble("totalOutrosCustos") != null){
-                            totalOtherCost = document.getDouble("totalOutrosCustos");
-                            totalOtherCost2 = totalOtherCost-editotherValues;
-                        } else{
-                            totalOtherCost2 = 0;
-                        }
-                    }
-                }
-            }
-        });
-
         editOtherCost.setContentView(R.layout.popup_edit_outro_custo);
 
         btnSaveEditOtherCost = editOtherCost.findViewById(R.id.btnSaveEditOtherCost);
@@ -1037,7 +922,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         edtEditNameOther.setText(nomeCusto);
 
         if (editotherValues != 0){
-            edtEditOtherValues.setText(String.valueOf(editotherValues));
+            edtEditOtherValues.setText(PrecoUtils.edicao(editotherValues));
         }
 
         btnSaveEditOtherCost.setOnClickListener(new View.OnClickListener() {
@@ -1045,22 +930,28 @@ public class FragmentoReceita extends Fragment implements SelectListener{
             public void onClick(View v) {
 
                 if (!edtEditOtherValues.getText().toString().isEmpty()){
-                    editotherValues = Double.parseDouble(edtEditOtherValues.getText().toString());
-
-                    totalOtherCost2+= editotherValues;
-
-                    db.collection("Produto").document(FragmentoProduto.produtoID).update("totalOutrosCustos",totalOtherCost2);
+                    try {
+                    editotherValues = PrecoUtils.parse(edtEditOtherValues.getText().toString());
+                    } catch (IllegalArgumentException e) {
+                        edtEditOtherValues.setError("Informe um valor monetário válido");
+                        return;
+                    }
+                    if (editotherValues < 0) {
+                        edtEditOtherValues.setError("O valor não pode ser negativo");
+                        return;
+                    }
 
                     Map<String, Object> editother = new HashMap<>();
                     editother.put("nomeCusto",edtEditNameOther.getText().toString());
-                    editother.put("valorCusto",Double.parseDouble(edtEditOtherValues.getText().toString()));
-                    db.collection("OutrosCustos").document(custoID).update(editother);
+                    editother.put("valorCusto",PrecoUtils.parse(edtEditOtherValues.getText().toString()));
+                    db.collection("OutrosCustos").document(custoID).update(editother)
+                            .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarOutrosCustos(
+                                    db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                    .addOnFailureListener(e -> Log.e("Receita", "Falha ao atualizar custo total", e)))
+                            .addOnFailureListener(e -> Log.e("Receita", "Falha ao editar custo", e));
                 }
                 editOtherCost.dismiss();
-                getActivity().finish();
-                getActivity().overridePendingTransition(0, 0);
-                startActivity(getActivity().getIntent());
-                getActivity().overridePendingTransition(0, 0);
+
             }
         });
         editOtherCost.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -1120,162 +1011,214 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         btnSaveQtdIng.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (valueIngrediente.isEmpty() || quantityIng.isEmpty()){
+                if (valueIngrediente == null || quantityIng == null ||
+                        valueIngrediente.trim().isEmpty() || quantityIng.trim().isEmpty()) {
                     Toast.makeText(getActivity(), "Adicione um valor ou quantidade para o Ingrediente "+nomeIngrediente, Toast.LENGTH_SHORT).show();
                 }else {
+                    try {
+                        if (PrecoUtils.parse(quantityIng) <= 0) {
+                            Toast.makeText(getActivity(), "Quantidade cadastrada deve ser maior que zero", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                    } catch (IllegalArgumentException e) {
+                        Toast.makeText(getActivity(), "Quantidade ou valor do ingrediente inválido", Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     if (undIngrediente.equals("Und") && SpinnerTypeQuantity.getSelectedItem().toString().equals("Und") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / Double.parseDouble(quantityIng));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / PrecoUtils.parse(quantityIng));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("Kg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("Kg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / Double.parseDouble(quantityIng));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / PrecoUtils.parse(quantityIng));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("Kg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("g") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) * 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) * 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("Kg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("mg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) * 1000000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) * 1000000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("g") && SpinnerTypeQuantity.getSelectedItem().toString().equals("mg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) * 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) * 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("mg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("g") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) / 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) / 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("mg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("Kg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) / 1000000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) / 1000000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("g") && SpinnerTypeQuantity.getSelectedItem().toString().equals("Kg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) / 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) / 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("L") && SpinnerTypeQuantity.getSelectedItem().toString().equals("mL") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) * 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) * 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     } else if (undIngrediente.equals("mL") && SpinnerTypeQuantity.getSelectedItem().toString().equals("L") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng) / 1000));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng) / 1000));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     }else if (undIngrediente.equals("g") && SpinnerTypeQuantity.getSelectedItem().toString().equals("g") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng)));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng)));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     }else if (undIngrediente.equals("mg") && SpinnerTypeQuantity.getSelectedItem().toString().equals("mg") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng)));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng)));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     }else if (undIngrediente.equals("L") && SpinnerTypeQuantity.getSelectedItem().toString().equals("L") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng)));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng)));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     }else if (undIngrediente.equals("mL") && SpinnerTypeQuantity.getSelectedItem().toString().equals("mL") && !edtQuantity.getText().toString().isEmpty()) {
-                        result = Double.parseDouble(edtQuantity.getText().toString()) * (Double.parseDouble(valueIngrediente) / (Double.parseDouble(quantityIng)));
+                        result = PrecoUtils.parse(edtQuantity.getText().toString()) * (PrecoUtils.parse(valueIngrediente) / (PrecoUtils.parse(quantityIng)));
                         Map<String, Object> saveing = new HashMap<>();
                         saveing.put("quantidadeProd", edtQuantity.getText().toString());
                         saveing.put("tipoUnid", SpinnerTypeQuantity.getSelectedItem().toString());
                         saveing.put("idProduto", FragmentoProduto.produtoID);
                         saveing.put("valorIngProd", result);
-                        totalIngredientes+= result;
-                        db.collection("Produto").document(FragmentoProduto.produtoID).update("totalIngredientes",totalIngredientes);
-                        db.collection("ListaIngrediente").document(idIngrediente).update(FragmentoProduto.produtoID, saveing);
+                        db.collection("ListaIngrediente").document(idIngrediente)
+                                .update(FragmentoProduto.produtoID, saveing)
+                                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(
+                                        db, FirebaseAuth.getInstance().getCurrentUser().getUid(), FragmentoProduto.produtoID)
+                                        .addOnFailureListener(e -> Log.e("Receita", "Erro ao somar ingredientes", e)))
+                                .addOnFailureListener(e -> Log.e("Receita", "Erro ao salvar quantidade", e));
                         editQuantity.dismiss();
                     }else {
                         Toast.makeText(getActivity(), "Não tem como converter a medida ou quantidade vazia", Toast.LENGTH_SHORT).show();
@@ -1290,34 +1233,24 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
 
     private void EventChangListerner3() {
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            return;
-        }
-
-        db.collection("ListaIngrediente")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereArrayContains(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-
-                        if (error != null){
-
-                            Log.e("Firestore error",error.getMessage());
-                            return;
-                        }for (DocumentChange dc : value.getDocumentChanges()){
-                            if (dc.getType() == DocumentChange.Type.ADDED){
-                                listProdIng.add(dc.getDocument().toObject(ProdutoIng.class));
-                            }
-                            myAdapterProdutoIng.notifyDataSetChanged();
-                        }
+        FirebaseUser usuario = FirebaseAuth.getInstance().getCurrentUser();
+        if (usuario == null) return;
+        final String uid = usuario.getUid();
+        final String pid = FragmentoProduto.produtoID;
+        ingredientesListener = db.collection("ListaIngrediente")
+                .whereEqualTo("idUsuario", uid)
+                .whereArrayContains("idProduto", pid)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) { Log.e("Receita", "Erro ao ouvir ingredientes", error); return; }
+                    if (value == null || listProdIng == null || myAdapterProdutoIng == null) return;
+                    listProdIng.clear();
+                    for (DocumentSnapshot doc : value.getDocuments()) {
+                        listProdIng.add(doc.toObject(ProdutoIng.class));
+                    }
+                    myAdapterProdutoIng.notifyDataSetChanged();
+                    if (!value.getMetadata().isFromCache() && !value.getMetadata().hasPendingWrites()) {
+                        PrecificacaoRepository.atualizarIngredientes(db, uid, pid)
+                                .addOnFailureListener(e -> Log.e("Receita", "Falha ao somar ingredientes", e));
                     }
                 });
     }
@@ -1346,40 +1279,34 @@ public class FragmentoReceita extends Fragment implements SelectListener{
     }
 
     private void EventChangListerner2() {
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            return;
-        }
-
-        db.collection("OutrosCustos")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereEqualTo(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-
-                        if (error != null){
-
-                            Log.e("Firestore error",error.getMessage());
-                            return;
-                        }
-
-                        for (DocumentChange dc : value.getDocumentChanges()){
-                            if (dc.getType() == DocumentChange.Type.ADDED){
-                                listOtherCost.add(dc.getDocument().toObject(OutrosCustos.class));
-                            }
-                            myAdapterOtherCost.notifyDataSetChanged();
-                        }
+        FirebaseUser usuario = FirebaseAuth.getInstance().getCurrentUser();
+        if (usuario == null) return;
+        final String uid = usuario.getUid();
+        final String pid = FragmentoProduto.produtoID;
+        custosListener = db.collection("OutrosCustos")
+                .whereEqualTo("idUsuario", uid)
+                .whereEqualTo("idProduto", pid)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) { Log.e("Receita", "Erro ao ouvir custos", error); return; }
+                    if (value == null || listOtherCost == null || myAdapterOtherCost == null) return;
+                    listOtherCost.clear();
+                    for (DocumentSnapshot doc : value.getDocuments()) {
+                        listOtherCost.add(doc.toObject(OutrosCustos.class));
+                    }
+                    myAdapterOtherCost.notifyDataSetChanged();
+                    if (!value.getMetadata().isFromCache() && !value.getMetadata().hasPendingWrites()) {
+                        PrecificacaoRepository.atualizarOutrosCustos(db, uid, pid)
+                                .addOnFailureListener(e -> Log.e("Receita", "Falha ao somar custos", e));
                     }
                 });
     }
 
+    @Override
+    public void onDestroyView() {
+        if (custosListener != null) { custosListener.remove(); custosListener = null; }
+        if (ingredientesListener != null) { ingredientesListener.remove(); ingredientesListener = null; }
+        super.onDestroyView();
+    }
 
     @Override
     public void onItemClicked(Ingrediente ingrediente) {
@@ -1415,36 +1342,25 @@ public class FragmentoReceita extends Fragment implements SelectListener{
         nomeCusto = outrosCustos.getNomeCusto();
         custoID = outrosCustos.getIdCusto();
         System.out.println("nomecusto "+ nomeCusto);
-        db.collection("OutrosCustos").document(custoID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.getDouble("valorCusto") == null) {
-                }else if (nomeCusto.equals("Eletricidade")){
-                    editvalueElectricity = documentSnapshot.getDouble("valorCusto");
-                }else if (nomeCusto.equals("Gasolina")){
-                    editvalueGasoline = documentSnapshot.getDouble("valorCusto");
-                }else if (nomeCusto.equals("Gás")) {
-                    editvalueCookingGas = documentSnapshot.getDouble("valorCusto");
-                }else {
-                    editotherValues = documentSnapshot.getDouble("valorCusto");
-                }
-            }
-        });
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (nomeCusto.equals("Eletricidade")) {
-                    showPopupEditElectricity();
-                }else if (nomeCusto.equals("Gasolina")){
-                    showPopupEditGasoline();
-                }else if (nomeCusto.equals("Gás")) {
-                    showPopupEditCookingGas();
-                }else {
-                    showPopupEditOtherCost();
-                }
-            }
-        }, 300);
+        db.collection("OutrosCustos").document(custoID).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists() || documentSnapshot.getDouble("valorCusto") == null) return;
+                    double valor = documentSnapshot.getDouble("valorCusto");
+                    if ("Eletricidade".equals(nomeCusto)) {
+                        editvalueElectricity = valor;
+                        showPopupEditElectricity();
+                    } else if ("Gasolina".equals(nomeCusto)) {
+                        editvalueGasoline = valor;
+                        showPopupEditGasoline();
+                    } else if ("Gás".equals(nomeCusto)) {
+                        editvalueCookingGas = valor;
+                        showPopupEditCookingGas();
+                    } else {
+                        editotherValues = valor;
+                        showPopupEditOtherCost();
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("Receita", "Erro ao carregar custo", e));
     }
 
     @Override

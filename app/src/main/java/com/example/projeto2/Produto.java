@@ -4,9 +4,11 @@ public class Produto {
 
     String descricaoProduto, idProduto, idUsuario, nomeProduto, tipoCusto;
     String precoFinal;
-    int margemLucro, outroCusto, totalEletricidade, totalGasolina, totalConsumoGas;
+    double margemLucro;
+    int outroCusto, totalEletricidade, totalGasolina, totalConsumoGas;
 
     String valorQqr;
+    Double totalIngredientes, totalOutrosCustos, rendimento;
 
     public Produto() {
     }
@@ -27,12 +29,19 @@ public class Produto {
     }
 
     public String getValorQqr() {
-        return "00.00";
+        return valorQqr;
     }
 
     public void setValorQqr(String valorQqr) {
         this.valorQqr = valorQqr;
     }
+
+    public Double getTotalIngredientes() { return totalIngredientes; }
+    public void setTotalIngredientes(Double valor) { totalIngredientes = valor; }
+    public Double getTotalOutrosCustos() { return totalOutrosCustos; }
+    public void setTotalOutrosCustos(Double valor) { totalOutrosCustos = valor; }
+    public Double getRendimento() { return rendimento; }
+    public void setRendimento(Double valor) { rendimento = valor; }
 
     public String getDescricaoProduto() {
         return descricaoProduto;
@@ -74,11 +83,11 @@ public class Produto {
         this.precoFinal = precoFinal;
     }
 
-    public int getMargemLucro() {
+    public double getMargemLucro() {
         return margemLucro;
     }
 
-    public void setMargemLucro(int margemLucro) {
+    public void setMargemLucro(double margemLucro) {
         this.margemLucro = margemLucro;
     }
 

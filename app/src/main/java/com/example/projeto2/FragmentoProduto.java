@@ -60,7 +60,7 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     public static int voltou = 0;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    public static String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    public static String userID;
     public static String produtoID;
     public static String nomeProduto;
     public static int count5=0;
@@ -76,6 +76,7 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     public static MyAdapter2 myAdapter2;
     public static ArrayList<Produto> list2;
     FirebaseFirestore db2;
+    private com.google.firebase.firestore.ListenerRegistration produtosListener;
     byte[] imageByte;
 
 
@@ -83,6 +84,8 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_principal, container, false);
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return view;
+        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
         Button btnAddProduct = view.findViewById(R.id.btnAddProduct);
@@ -117,10 +120,10 @@ public class FragmentoProduto extends Fragment implements SelectListener{
             @Override
             public boolean onQueryTextChange(String s) {
                 if(s.equals("")){
-                    myAdapter2 = new MyAdapter2(getActivity(),list2);
+                    myAdapter2 = new MyAdapter2(getActivity(),list2,FragmentoProduto.this);
                 }else {
                     filtroPesquisaProduto(s);
-                    myAdapter2 = new MyAdapter2(getActivity(), listSearchProduct);
+                    myAdapter2 = new MyAdapter2(getActivity(), listSearchProduct,FragmentoProduto.this);
 
                 }
                 recyclerView2.setLayoutManager(new GridLayoutManager(myAdapter2.context, 2));
@@ -291,29 +294,27 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     }
 
     public void EventChangListerner() {
-
-        db.collection("Produto").whereEqualTo("idUsuario", userID)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-
-                        if (error != null){
-
-                            Log.e("Firestore error",error.getMessage());
-                            return;
-                        }
-
-                        for (DocumentChange dc : value.getDocumentChanges()){
-                            if (dc.getType() == DocumentChange.Type.ADDED){
-                                list2.add(dc.getDocument().toObject(Produto.class));
-
-
-                            }
-                            myAdapter2.notifyDataSetChanged();
-                        }
+        produtosListener = db.collection("Produto").whereEqualTo("idUsuario", userID)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) { Log.e("FragmentoProduto", "Erro ao ouvir produtos", error); return; }
+                    if (value == null || list2 == null || myAdapter2 == null) return;
+                    list2.clear();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : value.getDocuments()) {
+                        list2.add(doc.toObject(Produto.class));
                     }
+                    if (schMyProducts != null && !schMyProducts.getQuery().toString().isEmpty()) {
+                        filtroPesquisaProduto(schMyProducts.getQuery().toString());
+                    }
+                    myAdapter2.notifyDataSetChanged();
                 });
     }
+
+    @Override
+    public void onDestroyView() {
+        if (produtosListener != null) { produtosListener.remove(); produtosListener = null; }
+        super.onDestroyView();
+    }
+
     public void filtroPesquisaProduto(String s) {
         listSearchProduct.clear();
 

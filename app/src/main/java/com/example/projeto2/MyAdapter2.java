@@ -97,48 +97,15 @@ public class MyAdapter2 extends RecyclerView.Adapter<MyAdapter2.MyViewHolder>{
             }
         });
 
-        db.collection("Produto").document(produto.getIdProduto()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.getDouble("totalIngredientes") == null && documentSnapshot.getDouble("totalOutrosCustos") == null) {
-
-                }else if (documentSnapshot.getDouble("totalIngredientes") != null && documentSnapshot.getDouble("totalOutrosCustos") != null) {
-                    totalProductValue = documentSnapshot.getDouble("totalIngredientes") + documentSnapshot.getDouble("totalOutrosCustos");
-                    totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                    holder.ValueProduct.setText(String.valueOf(totalProductValue));
-
-                }else if (documentSnapshot.getDouble("totalIngredientes") != null && documentSnapshot.getDouble("totalOutrosCustos") == null){
-                    totalProductValue = documentSnapshot.getDouble("totalIngredientes");
-                    if (documentSnapshot.getDouble("margemLucro") == null) {
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }else {
-                        totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }
-                }else {
-                    totalProductValue = documentSnapshot.getDouble("totalOutrosCustos");
-                    if (documentSnapshot.getDouble("margemLucro") == null) {
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }else {
-                        totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }
-                }
-            }
-        });
-
-
-        if(produto.getPrecoFinal() == null){
-            holder.ValueProduct.setText(produto.getValorQqr());
-
-        }else {
-            holder.ValueProduct.setText(produto.getPrecoFinal());
-        }
+        double ingredientes = PrecoUtils.numero(produto.getTotalIngredientes());
+        double outros = PrecoUtils.numero(produto.getTotalOutrosCustos());
+        holder.ValueProduct.setText(PrecoUtils.moedaSemSimbolo(
+                PrecoUtils.precoFinal(ingredientes, outros, produto.getMargemLucro())));
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onItemClicked(list2.get(position));
+                if (listener != null) listener.onItemClicked(produto);
             }
         });
 
@@ -146,7 +113,7 @@ public class MyAdapter2 extends RecyclerView.Adapter<MyAdapter2.MyViewHolder>{
             @Override
             public void onClick(View view) {
                 delete++;
-                listener.onItemClicked(list2.get(position));
+                if (listener != null) listener.onItemClicked(produto);
                 position2 = holder.getAbsoluteAdapterPosition();
             }
         });

@@ -64,7 +64,10 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
         ProdutoIng produtoIng = listProdIng.get(position);
+        holder.txtValueIngr1.setText(PrecoUtils.moeda(0));
+        holder.txtQuantity1.setText("—");
 
+        holder.txtIngr1.setTag(produtoIng.getIdIngrediente());
         db.collection("ListaIngrediente")
                 .whereEqualTo(
                         "idUsuario",
@@ -79,7 +82,8 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
 
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                System.out.println("Executou");
+                if (!task.isSuccessful() || task.getResult() == null ||
+                        !produtoIng.getIdIngrediente().equals(holder.txtIngr1.getTag())) return;
                 for(QueryDocumentSnapshot document : task.getResult()){
 
                     if (document.getString("idIngrediente").equals(produtoIng.idIngrediente)){
@@ -87,7 +91,7 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
                              txtQuantity = document.get(FragmentoProduto.produtoID + ".quantidadeProd").toString();
                              txtQuantity2 = document.get(FragmentoProduto.produtoID + ".tipoUnid").toString();
                              txtValue = document.get(FragmentoProduto.produtoID+".valorIngProd").toString();
-                            holder.txtValueIngr1.setText("R$ "+txtValue);
+                            holder.txtValueIngr1.setText(PrecoUtils.moedaTexto(txtValue));
                             holder.txtQuantity1.setText(txtQuantity + " " + txtQuantity2);
                             break;
 
@@ -101,7 +105,7 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
 
                             txtQuantity2 = document.get(FragmentoProduto.produtoID + ".tipoUnid").toString();
                             txtValue = document.get(FragmentoProduto.produtoID+".valorIngProd").toString();
-                            holder.txtValueIngr1.setText("R$ "+txtValue);
+                            holder.txtValueIngr1.setText(PrecoUtils.moedaTexto(txtValue));
                             holder.txtQuantity1.setText("0" + " " + txtQuantity2);
                         }
 
@@ -145,81 +149,21 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
         }
     }
 
-    public void deleteItemProdIng(int position, String ingredienteProd ) {
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            return;
-        }
-
-
-        db.collection("ListaIngrediente")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereArrayContains(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-
-                for(QueryDocumentSnapshot document : task.getResult()){
-
-                    if (document.getString("idIngrediente").equals(ingredienteProd)) {
-
-                        document.getReference().update("idProduto", FieldValue.arrayRemove(FragmentoProduto.produtoID));
-                    }else {
-
-                    }
-                }
-
-            }
-        });
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            return;
-        }
-
-
-        db.collection("ListaIngrediente")
-                .whereEqualTo(
-                        "idUsuario",
-                        FirebaseAuth.getInstance().getCurrentUser().getUid()
-                )
-                .whereArrayContains(
-                        "idProduto",
-                        FragmentoProduto.produtoID
-                )
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                if (task.isSuccessful()){
-                for(QueryDocumentSnapshot document : task.getResult()) {
-                    Log.d("tag", document.getId() + " => " + document.getData());
-
-                    if (document.getString("idIngrediente").equals(ingredienteProd)) {
-
-                        document.getReference().update(FragmentoProduto.produtoID, FieldValue.delete());
-
-
-                    }else {
-
-                    }
-                }
-                    }else {
-                    Log.d("tag", "Error getting documents: ", task.getException());
-                }
-
-            }
-        });
-
-        this.listProdIng.remove(position);
-        notifyItemChanged(position);
-}
+    public void deleteItemProdIng(int position, String ingredienteId) {
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ||
+                ingredienteId == null || ingredienteId.trim().isEmpty()) return;
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String pid = FragmentoProduto.produtoID;
+        // Remove vínculo e o mapa de receita deste produto em uma única atualização.
+        db.collection("ListaIngrediente").document(ingredienteId)
+                .update("idProduto", FieldValue.arrayRemove(pid), pid, FieldValue.delete())
+                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(db, uid, pid)
+                        .addOnFailureListener(e -> Log.e("MyAdapterProdutoIng", "Erro ao somar ingredientes", e)))
+                .addOnFailureListener(e -> {
+                    Log.e("MyAdapterProdutoIng", "Erro ao remover ingrediente da receita", e);
+                    notifyItemChanged(position);
+                    Toast.makeText(context, "Não foi possível retirar o ingrediente", Toast.LENGTH_SHORT).show();
+                });
+        // A lista será refeita pelo listener de FragmentoReceita.
+    }
 }
