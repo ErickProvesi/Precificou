@@ -77,25 +77,57 @@ public class MyAdapter2 extends RecyclerView.Adapter<MyAdapter2.MyViewHolder>{
         holder.NameProduct.setText(produto.getNomeProduto());
 
         holder.imgProductPhoto.setBackground(null);
+        holder.imgProductPhoto.setImageResource(
+                R.drawable.logo_precificou
+        );
 
-        StorageReference PhotoReference = mStorage.child(FragmentoProduto.userID+"/Produtos/"+produto.getIdProduto()+".png");
-        System.out.println("ID PRODUTO "+produto.getIdProduto());
+        StorageReference PhotoReference = mStorage.child(
+                FragmentoProduto.userID
+                        + "/Produtos/"
+                        + produto.getIdProduto()
+                        + ".png"
+        );
 
-        PhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                bmp.compress(Bitmap.CompressFormat.JPEG, 15, out);
-                holder.imgProductPhoto.setImageBitmap(bmp);
+// Identifica qual produto está sendo exibido neste card.
+        holder.imgProductPhoto.setTag(produto.getIdProduto());
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
+// Imagem exibida imediatamente.
+        holder.imgProductPhoto.setImageResource(
+                R.drawable.logo_precificou
+        );
 
-            }
-        });
+        PhotoReference.getBytes(ONE_MEGABYTE)
+
+                .addOnSuccessListener(bytes -> {
+
+                    // Evita aplicar uma imagem em um card
+                    // que já foi reutilizado para outro produto.
+                    if (!produto.getIdProduto().equals(
+                            holder.imgProductPhoto.getTag()
+                    )) {
+                        return;
+                    }
+
+                    Bitmap bmp = BitmapFactory.decodeByteArray(
+                            bytes,
+                            0,
+                            bytes.length
+                    );
+
+                    if (bmp != null) {
+
+                        holder.imgProductPhoto.setImageBitmap(bmp);
+
+                    }
+
+                })
+
+                .addOnFailureListener(e -> {
+
+                    // Mantém a imagem padrão se o produto
+                    // ainda não possuir uma imagem no Storage.
+
+                });
 
         double ingredientes = PrecoUtils.numero(produto.getTotalIngredientes());
         double outros = PrecoUtils.numero(produto.getTotalOutrosCustos());

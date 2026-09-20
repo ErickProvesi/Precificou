@@ -380,8 +380,6 @@ public class FragmentoProduto extends Fragment implements SelectListener{
                         for(QueryDocumentSnapshot document : task.getResult()){
                             document.getReference().update("idProduto", FieldValue.arrayRemove(produtoID));
                         }
-                        list2.remove(MyAdapter2.position2);
-                        myAdapter2.notifyDataSetChanged();
                     }
                 });
 

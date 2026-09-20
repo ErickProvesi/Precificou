@@ -164,6 +164,7 @@ public class FragmentoReceita extends Fragment implements SelectListener{
 
         RywIngredientProd = view.findViewById(R.id.RywIngredientProd);
         RywIngredientProd.setHasFixedSize(true);
+        RywIngredientProd.setItemAnimator(null);
         RywIngredientProd.setLayoutManager(new WrapContentLinearLayoutManage(getContext(), LinearLayoutManager.VERTICAL, false));
         listProdIng = new ArrayList<ProdutoIng>();
         myAdapterProdutoIng = new MyAdapterProdutoIng(getActivity(), listProdIng, this);
@@ -1243,11 +1244,99 @@ public class FragmentoReceita extends Fragment implements SelectListener{
                 .addSnapshotListener((value, error) -> {
                     if (error != null) { Log.e("Receita", "Erro ao ouvir ingredientes", error); return; }
                     if (value == null || listProdIng == null || myAdapterProdutoIng == null) return;
-                    listProdIng.clear();
+                    java.util.Set<String> idsPresentes =
+                            new java.util.HashSet<>();
+
+                    java.util.ArrayList<ProdutoIng> novaLista =
+                            new java.util.ArrayList<>();
+
                     for (DocumentSnapshot doc : value.getDocuments()) {
-                        listProdIng.add(doc.toObject(ProdutoIng.class));
+
+                        String ingredienteId = doc.getId();
+
+                        idsPresentes.add(ingredienteId);
+
+                        if (myAdapterProdutoIng.exclusaoPendente(ingredienteId)) {
+                            continue;
+                        }
+
+                        ProdutoIng ingrediente =
+                                doc.toObject(ProdutoIng.class);
+
+                        if (ingrediente != null) {
+                            novaLista.add(ingrediente);
+                        }
                     }
-                    myAdapterProdutoIng.notifyDataSetChanged();
+
+// Guarda o estado anterior para atualizar só o necessário.
+                    java.util.ArrayList<ProdutoIng> listaAnterior =
+                            new java.util.ArrayList<>(listProdIng);
+
+                    androidx.recyclerview.widget.DiffUtil.DiffResult diff =
+                            androidx.recyclerview.widget.DiffUtil.calculateDiff(
+                                    new androidx.recyclerview.widget.DiffUtil.Callback() {
+
+                                        @Override
+                                        public int getOldListSize() {
+                                            return listaAnterior.size();
+                                        }
+
+                                        @Override
+                                        public int getNewListSize() {
+                                            return novaLista.size();
+                                        }
+
+                                        @Override
+                                        public boolean areItemsTheSame(
+                                                int oldItemPosition,
+                                                int newItemPosition) {
+
+                                            return java.util.Objects.equals(
+                                                    listaAnterior
+                                                            .get(oldItemPosition)
+                                                            .getIdIngrediente(),
+
+                                                    novaLista
+                                                            .get(newItemPosition)
+                                                            .getIdIngrediente()
+                                            );
+                                        }
+
+                                        @Override
+                                        public boolean areContentsTheSame(
+                                                int oldItemPosition,
+                                                int newItemPosition) {
+
+                                            ProdutoIng antigo =
+                                                    listaAnterior.get(oldItemPosition);
+
+                                            ProdutoIng novo =
+                                                    novaLista.get(newItemPosition);
+
+                                            return java.util.Objects.equals(
+                                                    antigo.getNomeIngrediente(),
+                                                    novo.getNomeIngrediente()
+                                            )
+                                                    && java.util.Objects.equals(
+                                                    antigo.getPrecoIngrediente(),
+                                                    novo.getPrecoIngrediente()
+                                            )
+                                                    && java.util.Objects.equals(
+                                                    antigo.getQtdIngrediente(),
+                                                    novo.getQtdIngrediente()
+                                            )
+                                                    && java.util.Objects.equals(
+                                                    antigo.getUnidade(),
+                                                    novo.getUnidade()
+                                            );
+                                        }
+                                    }
+                            );
+
+                    listProdIng.clear();
+                    listProdIng.addAll(novaLista);
+
+                    diff.dispatchUpdatesTo(myAdapterProdutoIng);
                     if (!value.getMetadata().isFromCache() && !value.getMetadata().hasPendingWrites()) {
                         PrecificacaoRepository.atualizarIngredientes(db, uid, pid)
                                 .addOnFailureListener(e -> Log.e("Receita", "Falha ao somar ingredientes", e));

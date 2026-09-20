@@ -73,26 +73,35 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         }
 
         Ingrediente ingrediente = list.get(position);
-
         String ingredienteID = ingrediente.getIdIngrediente();
 
-        if (ingredienteID == null || ingredienteID.isEmpty()) {
+        if (ingredienteID == null || ingredienteID.trim().isEmpty()) {
+
+            // Devolve o card à posição original se não puder excluir.
+            notifyItemChanged(position);
             return;
         }
 
+        // Remove da interface imediatamente, acompanhando o swipe.
+        list.remove(position);
+        notifyItemRemoved(position);
+
+        // Depois solicita a exclusão no Firebase.
         db.collection("ListaIngrediente")
                 .document(ingredienteID)
                 .delete()
+
                 .addOnSuccessListener(unused -> {
 
-                    int index = list.indexOf(ingrediente);
+                    Log.d(
+                            "MyAdapter",
+                            "Ingrediente excluído: " + ingredienteID
+                    );
 
-                    if (index >= 0) {
-                        list.remove(index);
-                        notifyItemRemoved(index);
-                    }
-
+                    // Não removemos da lista novamente.
+                    // O card já desapareceu no momento do swipe.
                 })
+
                 .addOnFailureListener(e -> {
 
                     Log.e(
@@ -101,6 +110,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                             e
                     );
 
+                    // Restaura o ingrediente se o Firebase rejeitar.
+                    int posicaoRestaurada = Math.min(
+                            position,
+                            list.size()
+                    );
+
+                    list.add(posicaoRestaurada, ingrediente);
+                    notifyItemInserted(posicaoRestaurada);
+
+                    android.widget.Toast.makeText(
+                            context,
+                            "Não foi possível excluir o ingrediente",
+                            android.widget.Toast.LENGTH_SHORT
+                    ).show();
                 });
     }
 
