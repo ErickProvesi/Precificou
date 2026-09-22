@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.HashSet;
-import java.util.Set;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -43,12 +41,6 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     SelectListener listener;
-
-    private final Set<String> exclusoesPendentes = new HashSet<>();
-
-    public boolean exclusaoPendente(String ingredienteId) {
-        return exclusoesPendentes.contains(ingredienteId);
-    }
 
     public MyAdapterProdutoIng(Context context, ArrayList<ProdutoIng> listProdIng) {
         this.context = context;
@@ -158,109 +150,20 @@ public class MyAdapterProdutoIng extends RecyclerView.Adapter<MyAdapterProdutoIn
     }
 
     public void deleteItemProdIng(int position, String ingredienteId) {
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-
-        if (auth.getCurrentUser() == null
-                || ingredienteId == null
-                || ingredienteId.trim().isEmpty()
-                || position < 0
-                || position >= listProdIng.size()) {
-
-            if (position >= 0 && position < listProdIng.size()) {
-                notifyItemChanged(position);
-            }
-
-            return;
-        }
-
-        String uid = auth.getCurrentUser().getUid();
+        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null ||
+                ingredienteId == null || ingredienteId.trim().isEmpty()) return;
+        String uid = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
         String pid = FragmentoProduto.produtoID;
-
-        // Guarda o ingrediente caso seja necessário restaurá-lo.
-        ProdutoIng ingredienteRemovido = listProdIng.get(position);
-
-        // Impede que um snapshot intermediário o faça reaparecer.
-        exclusoesPendentes.add(ingredienteId);
-
-        // Atualiza a interface imediatamente.
-        listProdIng.remove(position);
-        notifyItemRemoved(position);
-
-        // Agora realiza a exclusão no Firestore.
-        db.collection("ListaIngrediente")
-                .document(ingredienteId)
-                .update(
-                        "idProduto",
-                        FieldValue.arrayRemove(pid),
-                        pid,
-                        FieldValue.delete()
-                )
-
-                .addOnSuccessListener(unused -> {
-
-                    // A escrita foi confirmada pelo Firestore.
-                    // Só agora liberamos a proteção contra
-                    // atualizações intermediárias da lista.
-
-                    PrecificacaoRepository.atualizarIngredientes(
-                            db,
-                            uid,
-                            pid
-                    ).addOnFailureListener(e -> {
-
-                        Log.e(
-                                "MyAdapterProdutoIng",
-                                "Erro ao recalcular ingredientes",
-                                e
-                        );
-
-                    });
-
-                })
-
+        // Remove vínculo e o mapa de receita deste produto em uma única atualização.
+        db.collection("ListaIngrediente").document(ingredienteId)
+                .update("idProduto", FieldValue.arrayRemove(pid), pid, FieldValue.delete())
+                .addOnSuccessListener(unused -> PrecificacaoRepository.atualizarIngredientes(db, uid, pid)
+                        .addOnFailureListener(e -> Log.e("MyAdapterProdutoIng", "Erro ao somar ingredientes", e)))
                 .addOnFailureListener(e -> {
-
-                    Log.e(
-                            "MyAdapterProdutoIng",
-                            "Erro ao remover ingrediente",
-                            e
-                    );
-
-                    exclusoesPendentes.remove(ingredienteId);
-
-                    // Restaura somente se ele ainda não estiver na lista.
-                    boolean jaExiste = false;
-
-                    for (ProdutoIng item : listProdIng) {
-
-                        if (ingredienteId.equals(item.getIdIngrediente())) {
-                            jaExiste = true;
-                            break;
-                        }
-                    }
-
-                    if (!jaExiste) {
-
-                        int posicaoRestaurada = Math.min(
-                                position,
-                                listProdIng.size()
-                        );
-
-                        listProdIng.add(
-                                posicaoRestaurada,
-                                ingredienteRemovido
-                        );
-
-                        notifyItemInserted(posicaoRestaurada);
-                    }
-
-                    Toast.makeText(
-                            context,
-                            "Não foi possível retirar o ingrediente",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Log.e("MyAdapterProdutoIng", "Erro ao remover ingrediente da receita", e);
+                    notifyItemChanged(position);
+                    Toast.makeText(context, "Não foi possível retirar o ingrediente", Toast.LENGTH_SHORT).show();
                 });
+        // A lista será refeita pelo listener de FragmentoReceita.
     }
 }
