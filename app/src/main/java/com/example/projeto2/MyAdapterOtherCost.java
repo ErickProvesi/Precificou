@@ -1,20 +1,17 @@
 package com.example.projeto2;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -48,7 +45,7 @@ public class MyAdapterOtherCost extends RecyclerView.Adapter<MyAdapterOtherCost.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         OutrosCustos outrosCustos = listOtherCost.get(position);
 
-        holder.txtValueOC1.setText(String.valueOf(outrosCustos.getValorCusto()));
+        holder.txtValueOC1.setText(PrecoUtils.moedaSemSimbolo(outrosCustos.getValorCusto()));
         holder.txtOtherCost1.setText(outrosCustos.getNomeCusto());
 
         holder.cardView1.setOnClickListener(new View.OnClickListener() {
@@ -75,27 +72,47 @@ public class MyAdapterOtherCost extends RecyclerView.Adapter<MyAdapterOtherCost.
             cardView1 = itemView.findViewById(R.id.card_outros_custos);
         }
     }
-    public void deleteItemOtherCost(int position, String custo ) {
+    public void deleteItemOtherCost(int position, String custo) {
 
+        if (position < 0 || position >= listOtherCost.size()) {
+            return;
+        }
 
-        db.collection("OutrosCustos").whereEqualTo("nomeCusto", custo).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        OutrosCustos outrosCustos = listOtherCost.get(position);
 
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+        String custoID = outrosCustos.getIdCusto();
 
+        if (custoID == null || custoID.trim().isEmpty()) {
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
+            Log.e("MyAdapterOtherCost", "Custo sem identificador");
 
-                    document.getReference().delete();
+            Toast.makeText(
+                    context,
+                    "Não foi possível identificar o custo",
+                    Toast.LENGTH_SHORT
+            ).show();
 
-                    System.out.print("ID CUSTO" + FragmentoReceita.outroCustoID);
+            return;
+        }
 
-                }
-
-            }
-
-        });
-        this.listOtherCost.remove(position);
-        notifyItemChanged(position);
-}
+        db.collection("OutrosCustos")
+                .document(custoID)
+                .delete()
+                .addOnSuccessListener(unused -> {
+                    String uid = com.google.firebase.auth.FirebaseAuth.getInstance()
+                            .getCurrentUser() == null ? "" :
+                            com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    String pid = outrosCustos.getIdProduto();
+                    if (!uid.isEmpty() && pid != null) {
+                        PrecificacaoRepository.atualizarOutrosCustos(db, uid, pid)
+                                .addOnFailureListener(e -> Log.e("MyAdapterOtherCost", "Erro ao atualizar total", e));
+                    }
+                    // A lista é atualizada pelo listener em FragmentoReceita.
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("MyAdapterOtherCost", "Erro ao excluir custo", e);
+                    if (position >= 0 && position < listOtherCost.size()) notifyItemChanged(position); // restaura o swipe
+                    Toast.makeText(context, "Não foi possível excluir o custo", Toast.LENGTH_SHORT).show();
+                });
+    }
 }

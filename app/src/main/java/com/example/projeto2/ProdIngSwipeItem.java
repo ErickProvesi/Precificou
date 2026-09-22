@@ -28,8 +28,8 @@ public class ProdIngSwipeItem extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
         int position = viewHolder.getBindingAdapterPosition();
-        myAdapterProdutoIng.deleteItemProdIng(position, listProdIng
-                .get(viewHolder.getBindingAdapterPosition()).getIdIngrediente());
+        if (position == RecyclerView.NO_POSITION || position >= listProdIng.size()) return;
+        myAdapterProdutoIng.deleteItemProdIng(position, listProdIng.get(position).getIdIngrediente());
 
     }
 }

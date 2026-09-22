@@ -28,14 +28,26 @@ public class SwipeItem extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+    public void onSwiped(
+            @NonNull RecyclerView.ViewHolder viewHolder,
+            int direction
+    ) {
+
         int position = viewHolder.getBindingAdapterPosition();
 
-//      Log.i("teste",mItemAdapter.teste3("2"));
-        mItemAdapter.deleteItem(position, listIngredient2.get(viewHolder.getBindingAdapterPosition()).getNomeIngrediente());
+        if (position == RecyclerView.NO_POSITION
+                || position < 0
+                || position >= listIngredient2.size()) {
+            return;
+        }
 
+        String nomeIngrediente =
+                listIngredient2.get(position).getNomeIngrediente();
 
-
+        mItemAdapter.deleteItem(
+                position,
+                nomeIngrediente
+        );
     }
 
 }

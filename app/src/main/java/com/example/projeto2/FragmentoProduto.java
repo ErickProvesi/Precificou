@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
@@ -58,7 +60,7 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     public static int voltou = 0;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    public static String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    public static String userID;
     public static String produtoID;
     public static String nomeProduto;
     public static int count5=0;
@@ -74,6 +76,7 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     public static MyAdapter2 myAdapter2;
     public static ArrayList<Produto> list2;
     FirebaseFirestore db2;
+    private com.google.firebase.firestore.ListenerRegistration produtosListener;
     byte[] imageByte;
 
 
@@ -81,6 +84,8 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_principal, container, false);
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return view;
+        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
         Button btnAddProduct = view.findViewById(R.id.btnAddProduct);
@@ -115,10 +120,10 @@ public class FragmentoProduto extends Fragment implements SelectListener{
             @Override
             public boolean onQueryTextChange(String s) {
                 if(s.equals("")){
-                    myAdapter2 = new MyAdapter2(getActivity(),list2);
+                    myAdapter2 = new MyAdapter2(getActivity(),list2,FragmentoProduto.this);
                 }else {
                     filtroPesquisaProduto(s);
-                    myAdapter2 = new MyAdapter2(getActivity(), listSearchProduct);
+                    myAdapter2 = new MyAdapter2(getActivity(), listSearchProduct,FragmentoProduto.this);
 
                 }
                 recyclerView2.setLayoutManager(new GridLayoutManager(myAdapter2.context, 2));
@@ -144,48 +149,27 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     @Override
     public void onItemClicked(Produto produto) {
 
-
-        if (MyAdapter2.delete == 0) {
-            Intent intent = new Intent(getActivity(), Perfil_Produto.class);
-            nomeProduto = produto.getNomeProduto();
-
-            db.collection("Produto").whereEqualTo("nomeProduto", produto.getNomeProduto()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-
-                            produtoID = document.getString("idProduto");
-                            System.out.print("ID PRODUTO" + produtoID);
-                        }
-
-                        startActivity(intent);
-                    }
-                }
-
-            });
-        }else {
-            db.collection("Produto").whereEqualTo("nomeProduto", produto.getNomeProduto()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-
-                            produtoID = document.getString("idProduto");
-                            System.out.print("ID PRODUTO" + produtoID);
-                        }
-                    }
-                }
-
-            });
-            System.out.println("POSITION"+MyAdapter2.position2);
-            showConfirmDeletePopup();
-            nomeProduto = produto.getNomeProduto();
+        if (produto == null || produto.getIdProduto() == null) {
+            return;
         }
 
+        produtoID = produto.getIdProduto();
+        nomeProduto = produto.getNomeProduto();
 
+        if (MyAdapter2.delete == 0) {
+
+            Intent intent = new Intent(
+                    requireActivity(),
+                    Perfil_Produto.class
+            );
+
+            startActivity(intent);
+
+        } else {
+
+            showConfirmDeletePopup();
+
+        }
     }
 
     @Override
@@ -310,29 +294,27 @@ public class FragmentoProduto extends Fragment implements SelectListener{
     }
 
     public void EventChangListerner() {
-
-        db.collection("Produto").whereEqualTo("idUsuario", userID)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-
-                        if (error != null){
-
-                            Log.e("Firestore error",error.getMessage());
-                            return;
-                        }
-
-                        for (DocumentChange dc : value.getDocumentChanges()){
-                            if (dc.getType() == DocumentChange.Type.ADDED){
-                                list2.add(dc.getDocument().toObject(Produto.class));
-
-
-                            }
-                            myAdapter2.notifyDataSetChanged();
-                        }
+        produtosListener = db.collection("Produto").whereEqualTo("idUsuario", userID)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) { Log.e("FragmentoProduto", "Erro ao ouvir produtos", error); return; }
+                    if (value == null || list2 == null || myAdapter2 == null) return;
+                    list2.clear();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : value.getDocuments()) {
+                        list2.add(doc.toObject(Produto.class));
                     }
+                    if (schMyProducts != null && !schMyProducts.getQuery().toString().isEmpty()) {
+                        filtroPesquisaProduto(schMyProducts.getQuery().toString());
+                    }
+                    myAdapter2.notifyDataSetChanged();
                 });
     }
+
+    @Override
+    public void onDestroyView() {
+        if (produtosListener != null) { produtosListener.remove(); produtosListener = null; }
+        super.onDestroyView();
+    }
+
     public void filtroPesquisaProduto(String s) {
         listSearchProduct.clear();
 
@@ -355,6 +337,19 @@ public class FragmentoProduto extends Fragment implements SelectListener{
         btnConfirmdeleteProduct = confirmDeleteProduct.findViewById(R.id.btnConfirmDeleteProduct);
         btnReturnDeleteProduct = confirmDeleteProduct.findViewById(R.id.btnReturnDeleteProduct);
 
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            Toast.makeText(
+                    requireContext(),
+                    "Sua sessão expirou. Faça login novamente.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
         btnReturnDeleteProduct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -370,23 +365,31 @@ public class FragmentoProduto extends Fragment implements SelectListener{
                 fileRef.delete();
 
 
-                db.collection("ListaIngrediente").whereArrayContains("idProduto", produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                db.collection("ListaIngrediente")
+                        .whereEqualTo(
+                                "idUsuario",
+                                FirebaseAuth.getInstance().getCurrentUser().getUid()
+                        )
+                        .whereArrayContains("idProduto", produtoID)
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
 
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                         System.out.println("Executou");
                         for(QueryDocumentSnapshot document : task.getResult()){
-
-                            //Log.i("teste",document.getId());
                             document.getReference().update("idProduto", FieldValue.arrayRemove(produtoID));
                         }
-                        list2.remove(MyAdapter2.position2);
-                        myAdapter2.notifyDataSetChanged();
                     }
                 });
 
-                db.collection("OutrosCustos").whereEqualTo("idProduto", produtoID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                db.collection("OutrosCustos")
+                        .whereEqualTo(
+                                "idUsuario",
+                                FirebaseAuth.getInstance().getCurrentUser().getUid()
+                        )
+                        .whereEqualTo("idProduto", produtoID)
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 

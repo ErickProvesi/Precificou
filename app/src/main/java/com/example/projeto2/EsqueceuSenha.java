@@ -55,12 +55,7 @@ public class EsqueceuSenha extends AppCompatActivity {
         imgBackRecover.setOnClickListener(view -> backToLoginScreen());
 
 
-        btnSendRecover.setOnClickListener(view -> {
-
-            buscarEmail(edtEmailRecover.getText().toString(), view);
-
-
-    });
+        btnSendRecover.setOnClickListener(this::recoverPassword);
     }
     private void backToLoginScreen() {
         Intent LoginScreen = new Intent(EsqueceuSenha.this, Login.class);
@@ -104,23 +99,5 @@ public class EsqueceuSenha extends AppCompatActivity {
                 snackbar.show();
             }
         });
-    }
-
-    private void buscarEmail (String emailDigitado, View view){
-
-        db.collection("Usuario").whereEqualTo("emailUsuario",emailDigitado).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (!task.getResult().isEmpty()){
-                    for(QueryDocumentSnapshot document : task.getResult()){
-                        Log.d("Ablublé",document.getId()+" => "+document.getData());
-                        sendEmail(view);
-                    }
-                }else {
-                    Toast.makeText(getApplicationContext(),"Email não cadastrado",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
     }
 }

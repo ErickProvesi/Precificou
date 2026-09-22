@@ -77,68 +77,67 @@ public class MyAdapter2 extends RecyclerView.Adapter<MyAdapter2.MyViewHolder>{
         holder.NameProduct.setText(produto.getNomeProduto());
 
         holder.imgProductPhoto.setBackground(null);
+        holder.imgProductPhoto.setImageResource(
+                R.drawable.logo_precificou
+        );
 
-        StorageReference PhotoReference = mStorage.child(FragmentoProduto.userID+"/Produtos/"+produto.getIdProduto()+".png");
-        System.out.println("ID PRODUTO "+produto.getIdProduto());
+        StorageReference PhotoReference = mStorage.child(
+                FragmentoProduto.userID
+                        + "/Produtos/"
+                        + produto.getIdProduto()
+                        + ".png"
+        );
 
-        PhotoReference.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                bmp.compress(Bitmap.CompressFormat.JPEG, 15, out);
-                holder.imgProductPhoto.setImageBitmap(bmp);
+// Identifica qual produto está sendo exibido neste card.
+        holder.imgProductPhoto.setTag(produto.getIdProduto());
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
+// Imagem exibida imediatamente.
+        holder.imgProductPhoto.setImageResource(
+                R.drawable.logo_precificou
+        );
 
-            }
-        });
+        PhotoReference.getBytes(ONE_MEGABYTE)
 
-        db.collection("Produto").document(produto.getIdProduto()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.getDouble("totalIngredientes") == null && documentSnapshot.getDouble("totalOutrosCustos") == null) {
+                .addOnSuccessListener(bytes -> {
 
-                }else if (documentSnapshot.getDouble("totalIngredientes") != null && documentSnapshot.getDouble("totalOutrosCustos") != null) {
-                    totalProductValue = documentSnapshot.getDouble("totalIngredientes") + documentSnapshot.getDouble("totalOutrosCustos");
-                    totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                    holder.ValueProduct.setText(String.valueOf(totalProductValue));
-
-                }else if (documentSnapshot.getDouble("totalIngredientes") != null && documentSnapshot.getDouble("totalOutrosCustos") == null){
-                    totalProductValue = documentSnapshot.getDouble("totalIngredientes");
-                    if (documentSnapshot.getDouble("margemLucro") == null) {
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }else {
-                        totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
+                    // Evita aplicar uma imagem em um card
+                    // que já foi reutilizado para outro produto.
+                    if (!produto.getIdProduto().equals(
+                            holder.imgProductPhoto.getTag()
+                    )) {
+                        return;
                     }
-                }else {
-                    totalProductValue = documentSnapshot.getDouble("totalOutrosCustos");
-                    if (documentSnapshot.getDouble("margemLucro") == null) {
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
-                    }else {
-                        totalProductValue = (totalProductValue * (documentSnapshot.getDouble("margemLucro") / 100)) + totalProductValue;
-                        holder.ValueProduct.setText(String.valueOf(totalProductValue));
+
+                    Bitmap bmp = BitmapFactory.decodeByteArray(
+                            bytes,
+                            0,
+                            bytes.length
+                    );
+
+                    if (bmp != null) {
+
+                        holder.imgProductPhoto.setImageBitmap(bmp);
+
                     }
-                }
-            }
-        });
 
+                })
 
-        if(produto.getPrecoFinal() == null){
-            holder.ValueProduct.setText(produto.getValorQqr());
+                .addOnFailureListener(e -> {
 
-        }else {
-            holder.ValueProduct.setText(produto.getPrecoFinal());
-        }
+                    // Mantém a imagem padrão se o produto
+                    // ainda não possuir uma imagem no Storage.
+
+                });
+
+        double ingredientes = PrecoUtils.numero(produto.getTotalIngredientes());
+        double outros = PrecoUtils.numero(produto.getTotalOutrosCustos());
+        holder.ValueProduct.setText(PrecoUtils.moedaSemSimbolo(
+                PrecoUtils.precoFinal(ingredientes, outros, produto.getMargemLucro())));
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onItemClicked(list2.get(position));
+                if (listener != null) listener.onItemClicked(produto);
             }
         });
 
@@ -146,7 +145,7 @@ public class MyAdapter2 extends RecyclerView.Adapter<MyAdapter2.MyViewHolder>{
             @Override
             public void onClick(View view) {
                 delete++;
-                listener.onItemClicked(list2.get(position));
+                if (listener != null) listener.onItemClicked(produto);
                 position2 = holder.getAbsoluteAdapterPosition();
             }
         });

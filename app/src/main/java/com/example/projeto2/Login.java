@@ -87,13 +87,6 @@ public class Login extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
-        if (FragmentoPerfil.reload == 1) {
-            Intent intent = getIntent();
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            FragmentoPerfil.reload = 0;
-            System.exit(0);
-            startActivity(intent);
-        }
 
         txtForgotPassword = findViewById(R.id.txtForgotPassword);
         txtGoRegister = findViewById(R.id.txtGoRegister);
@@ -120,7 +113,7 @@ public class Login extends AppCompatActivity {
         txtGoRegister.setMovementMethod(LinkMovementMethod.getInstance());
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("390320075381-hmf63bbb7cj2ohlnv4atjvlupna23kjs.apps.googleusercontent.com").requestEmail().build();
+                .requestIdToken(getString(R.string.google_web_client_id)).requestEmail().build();
 
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
@@ -351,31 +344,83 @@ public class Login extends AppCompatActivity {
 
     private void SaveUserDataGoogle() {
 
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+
+            Log.e("Login", "Usuário Google não autenticado");
+
+            return;
+        }
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userID = currentUser.getUid();
 
-        Map<String, Object> users = new HashMap<>();
-        users.put("nomeUsuario", personName);
-        users.put("idUsuario", userID);
-        users.put("fotoUsuario", "");
-        users.put("senhaUsuario", "Google Account");
+        DocumentReference documentReference =
+                db.collection("Usuario").document(userID);
 
-        DocumentReference documentReference = db.collection("Usuario").document(userID);
-        documentReference.set(users).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Log.d("db", "Sucesso ao salvar os dados");
+        documentReference.get()
+                .addOnSuccessListener(documentSnapshot -> {
+
+                    // Usuário já possui cadastro no Firestore.
+                    // Preserva nome, foto e demais informações existentes.
+
+                    if (documentSnapshot.exists()) {
+
+                        Log.d(
+                                "Login",
+                                "Cadastro Google já existente"
+                        );
+
                         GoogleLogin = 1;
+
                         mainScreen();
 
+                        return;
                     }
+
+                    // Primeiro acesso: cria o perfil.
+
+                    Map<String, Object> users = new HashMap<>();
+
+                    users.put("nomeUsuario", personName);
+                    users.put("idUsuario", userID);
+                    users.put("fotoUsuario", "");
+
+                    documentReference.set(users)
+                            .addOnSuccessListener(unused -> {
+
+                                Log.d(
+                                        "Login",
+                                        "Cadastro Google criado com sucesso"
+                                );
+
+                                GoogleLogin = 1;
+
+                                mainScreen();
+
+                            })
+                            .addOnFailureListener(e -> {
+
+                                Log.e(
+                                        "Login",
+                                        "Erro ao cadastrar usuário Google",
+                                        e
+                                );
+
+                            });
+
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("db_error" ,"Erro ao salvar os dados" + e.toString());
-                    }
+                .addOnFailureListener(e -> {
+
+                    Log.e(
+                            "Login",
+                            "Erro ao consultar cadastro Google",
+                            e
+                    );
+
                 });
     }
 }

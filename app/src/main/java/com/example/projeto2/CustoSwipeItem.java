@@ -28,8 +28,8 @@ public class CustoSwipeItem extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
         int position = viewHolder.getBindingAdapterPosition();
-        myAdapterOtherCost.deleteItemOtherCost(position, listOtherCost
-                .get(viewHolder.getBindingAdapterPosition()).getNomeCusto());
+        if (position == RecyclerView.NO_POSITION || position >= listOtherCost.size()) return;
+        myAdapterOtherCost.deleteItemOtherCost(position, listOtherCost.get(position).getNomeCusto());
 
     }
 }

@@ -8,11 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.method.KeyListener;
@@ -26,7 +24,19 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.window.SplashScreen;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.StorageException;
+import android.app.Activity;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import com.google.android.gms.common.api.ApiException;
+import com.google.firebase.auth.GoogleAuthProvider;
+
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,19 +57,18 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 public class FragmentoPerfil extends Fragment {
 
@@ -67,7 +76,6 @@ public class FragmentoPerfil extends Fragment {
     Dialog EditEmail, EditPassword, DeleteAccount, Warning;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    String senhaAtual="a";
     FirebaseUser user = mAuth.getCurrentUser();
     TextView txtEmailProfile;
     Button btnEditEmail, btnEditPassword, btnDeleteAccount, btnExitAccount;
@@ -105,35 +113,39 @@ public class FragmentoPerfil extends Fragment {
         googlePhotoReference = mStorage.child(FragmentoProduto.userID+"/"+FragmentoProduto.userID+".png");
         final long ONE_MEGABYTE = 768 * 768;
 
+        FirebaseUser usuarioAutenticado = mAuth.getCurrentUser();
 
+        if (usuarioAutenticado == null) {
+            return view;
+        }
 
-            db.collection("Usuario").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
+        db.collection("Usuario")
+                .document(usuarioAutenticado.getUid())
+                .get()
+                .addOnCompleteListener(task -> {
 
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                    if (!task.isSuccessful()) {
 
-                            senhaAtual = document.getString("senhaUsuario");
+                        Log.e(
+                                "FragmentoPerfil",
+                                "Erro ao carregar dados do perfil",
+                                task.getException()
+                        );
+
+                        return;
+                    }
+
+                    DocumentSnapshot document = task.getResult();
+
+                    if (document != null && document.exists() && isAdded()) {
+
+                        String nomeUsuario = document.getString("nomeUsuario");
+
+                        if (nomeUsuario != null) {
+                            edtProfileName.setText(nomeUsuario);
                         }
                     }
-                }
-
-            });
-
-            db.collection("Usuario").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-
-                            edtProfileName.setText(document.getString("nomeUsuario"));
-
-                        }
-                    }
-                }
-            });
+                });
 
         if (Login.GoogleLogin == 1) {
             imgProfilePic.setBackground(null);
@@ -156,8 +168,7 @@ public class FragmentoPerfil extends Fragment {
                         personId = acct.getId();
                         personPhoto = acct.getPhotoUrl();
 
-                        Picasso.get().load(personPhoto).into(imgProfilePic);
-                        System.out.println("Executou aqui");
+                        Glide.with(FragmentoPerfil.this).load(personPhoto).into(imgProfilePic);
 
                     } else {
 
@@ -181,13 +192,17 @@ public class FragmentoPerfil extends Fragment {
                 }
             });
 
-        imgEditPic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imgEditPic.setOnClickListener(view2 -> {
 
-                startActivityForResult(intent, 1000);
-            }
+            pickImageLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia
+                                            .ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
+
         });
 
         listener = edtProfileName.getKeyListener();
@@ -200,21 +215,6 @@ public class FragmentoPerfil extends Fragment {
         Warning = new Dialog(getActivity());
 
         txtEmailProfile.setText(mAuth.getCurrentUser().getEmail());
-
-        db.collection("Usuario").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        senhaAtual = document.getString("senhaUsuario");
-
-                    }
-
-                }
-            }
-        });
 
 
         btnExitAccount.setOnClickListener(view14 -> {
@@ -300,65 +300,613 @@ public class FragmentoPerfil extends Fragment {
         return view;
 
     }
-    public void showEmailPopup(View view){
-        Button btnModifyEmail;
-        EditText edtCurrentEmail, edtNewEmail, edtConfirmNewEmail, edtPassword;
+
+    private final ActivityResultLauncher<Intent> googleReauthLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+
+                        if (result.getResultCode()
+                                != Activity.RESULT_OK) {
+
+                            showDeleteError(
+                                    "Autenticação Google cancelada",
+                                    null
+                            );
+
+                            return;
+                        }
+
+                        try {
+
+                            GoogleSignInAccount account =
+                                    GoogleSignIn
+                                            .getSignedInAccountFromIntent(
+                                                    result.getData()
+                                            )
+                                            .getResult(ApiException.class);
+
+                            if (account == null
+                                    || account.getIdToken() == null) {
+
+                                showDeleteError(
+                                        "Não foi possível obter a credencial Google",
+                                        null
+                                );
+
+                                return;
+                            }
+
+                            FirebaseUser currentUser =
+                                    FirebaseAuth.getInstance()
+                                            .getCurrentUser();
+
+                            if (currentUser == null) {
+
+                                showDeleteError(
+                                        "Usuário não autenticado",
+                                        null
+                                );
+
+                                return;
+                            }
+
+                            AuthCredential credential =
+                                    GoogleAuthProvider.getCredential(
+                                            account.getIdToken(),
+                                            null
+                                    );
+
+                            currentUser.reauthenticate(credential)
+                                    .addOnCompleteListener(task -> {
+
+                                        if (task.isSuccessful()) {
+
+                                            deleteUserAccount();
+
+                                        } else {
+
+                                            showDeleteError(
+                                                    "Falha na reautenticação Google",
+                                                    task.getException()
+                                            );
+                                        }
+                                    });
+
+                        } catch (ApiException e) {
+
+                            showDeleteError(
+                                    "Erro na autenticação Google",
+                                    e
+                            );
+                        }
+                    }
+            );
+
+    private void reauthenticateGoogleForDeletion() {
+
+        GoogleSignInOptions gso =
+                new GoogleSignInOptions.Builder(
+                        GoogleSignInOptions.DEFAULT_SIGN_IN
+                )
+                        .requestIdToken(
+                                getString(R.string.google_web_client_id)
+                        )
+                        .requestEmail()
+                        .build();
+
+        GoogleSignInClient googleClient =
+                GoogleSignIn.getClient(
+                        requireActivity(),
+                        gso
+                );
+
+        // Encerra a sessão Google local para solicitar
+        // novamente a escolha/autenticação da conta.
+
+        googleClient.signOut()
+                .addOnCompleteListener(task -> {
+
+                    if (!isAdded()) {
+                        return;
+                    }
+
+                    if (!task.isSuccessful()) {
+
+                        showDeleteError(
+                                "Não foi possível iniciar a autenticação Google",
+                                task.getException()
+                        );
+
+                        return;
+                    }
+
+                    googleReauthLauncher.launch(
+                            googleClient.getSignInIntent()
+                    );
+                });
+    }
+
+    private void deleteUserAccount() {
+
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+            showDeleteError(
+                    "Usuário não autenticado",
+                    null
+            );
+            return;
+        }
+
+        String uid = currentUser.getUid();
+
+        // Consulta somente documentos do usuário autenticado.
+
+        Task<QuerySnapshot> produtosTask =
+                db.collection("Produto")
+                        .whereEqualTo("idUsuario", uid)
+                        .get();
+
+        Task<QuerySnapshot> ingredientesTask =
+                db.collection("ListaIngrediente")
+                        .whereEqualTo("idUsuario", uid)
+                        .get();
+
+        Task<QuerySnapshot> custosTask =
+                db.collection("OutrosCustos")
+                        .whereEqualTo("idUsuario", uid)
+                        .get();
+
+        // Aguarda a conclusão das três consultas.
+
+        Tasks.whenAll(
+                produtosTask,
+                ingredientesTask,
+                custosTask
+        ).addOnCompleteListener(queryTask -> {
+
+            if (!queryTask.isSuccessful()) {
+
+                showDeleteError(
+                        "Erro ao consultar os dados da conta",
+                        queryTask.getException()
+                );
+
+                return;
+            }
+
+            QuerySnapshot produtos = produtosTask.getResult();
+            QuerySnapshot ingredientes = ingredientesTask.getResult();
+            QuerySnapshot custos = custosTask.getResult();
+
+            if (produtos == null
+                    || ingredientes == null
+                    || custos == null) {
+
+                showDeleteError(
+                        "Não foi possível carregar os dados da conta",
+                        null
+                );
+
+                return;
+            }
+
+            // Primeiro excluímos as imagens.
+
+            ArrayList<Task<?>> imageTasks =
+                    new ArrayList<>();
+
+            imageTasks.add(
+                    deleteImageIfExists(
+                            uid + "/" + uid + ".png"
+                    )
+            );
+
+            for (DocumentSnapshot produto : produtos.getDocuments()) {
+
+                String produtoID =
+                        produto.getString("idProduto");
+
+                if (produtoID == null || produtoID.isEmpty()) {
+                    produtoID = produto.getId();
+                }
+
+                imageTasks.add(
+                        deleteImageIfExists(
+                                uid + "/Produtos/" + produtoID + ".png"
+                        )
+                );
+            }
+
+            Tasks.whenAll(imageTasks)
+                    .addOnCompleteListener(imagesTask -> {
+
+                        if (!imagesTask.isSuccessful()) {
+
+                            showDeleteError(
+                                    "Erro ao excluir imagens da conta",
+                                    imagesTask.getException()
+                            );
+
+                            return;
+                        }
+
+                        // Agora excluímos os documentos.
+
+                        ArrayList<Task<?>> deleteTasks =
+                                new ArrayList<>();
+
+                        for (DocumentSnapshot produto
+                                : produtos.getDocuments()) {
+
+                            deleteTasks.add(
+                                    produto.getReference().delete()
+                            );
+                        }
+
+                        for (DocumentSnapshot ingrediente
+                                : ingredientes.getDocuments()) {
+
+                            deleteTasks.add(
+                                    ingrediente.getReference().delete()
+                            );
+                        }
+
+                        for (DocumentSnapshot custo
+                                : custos.getDocuments()) {
+
+                            deleteTasks.add(
+                                    custo.getReference().delete()
+                            );
+                        }
+
+                        Tasks.whenAll(deleteTasks)
+                                .addOnCompleteListener(dataTask -> {
+
+                                    if (!dataTask.isSuccessful()) {
+
+                                        showDeleteError(
+                                                "Erro ao excluir dados da conta",
+                                                dataTask.getException()
+                                        );
+
+                                        return;
+                                    }
+
+                                    // Exclui o perfil depois dos
+                                    // outros documentos.
+
+                                    db.collection("Usuario")
+                                            .document(uid)
+                                            .delete()
+                                            .addOnCompleteListener(profileTask -> {
+
+                                                if (!profileTask.isSuccessful()) {
+
+                                                    showDeleteError(
+                                                            "Erro ao excluir perfil",
+                                                            profileTask.getException()
+                                                    );
+
+                                                    return;
+                                                }
+
+                                                // Por último, exclui a
+                                                // conta no Authentication.
+
+                                                currentUser.delete()
+                                                        .addOnCompleteListener(authTask -> {
+
+                                                            if (!authTask.isSuccessful()) {
+
+                                                                showDeleteError(
+                                                                        "Erro ao excluir a conta do Firebase Authentication",
+                                                                        authTask.getException()
+                                                                );
+
+                                                                return;
+                                                            }
+
+                                                            if (isAdded()) {
+
+                                                                Warning.dismiss();
+
+                                                                Toast.makeText(
+                                                                        requireContext(),
+                                                                        "Conta excluída com sucesso",
+                                                                        Toast.LENGTH_SHORT
+                                                                ).show();
+
+                                                                exitDelete();
+                                                            }
+                                                        });
+                                            });
+                                });
+                    });
+        });
+    }
+
+    private void showDeleteError(
+            String mensagem,
+            Exception exception
+    ) {
+
+        Log.e(
+                "FragmentoPerfil",
+                mensagem,
+                exception
+        );
+
+        if (!isAdded()) {
+            return;
+        }
+
+        Button btnConfirm =
+                Warning.findViewById(R.id.btnConfirm);
+
+        if (btnConfirm != null) {
+            btnConfirm.setEnabled(true);
+        }
+
+        Toast.makeText(
+                requireContext(),
+                mensagem + ". Tente novamente.",
+                Toast.LENGTH_LONG
+        ).show();
+    }
+
+    private Task<Void> deleteImageIfExists(String path) {
+
+        return mStorage.child(path)
+                .delete()
+                .continueWith(task -> {
+
+                    if (task.isSuccessful()) {
+                        return null;
+                    }
+
+                    Exception exception = task.getException();
+
+                    if (exception instanceof StorageException) {
+
+                        StorageException storageException =
+                                (StorageException) exception;
+
+                        if (storageException.getErrorCode()
+                                == StorageException.ERROR_OBJECT_NOT_FOUND) {
+
+                            return null;
+                        }
+                    }
+
+                    if (exception != null) {
+                        throw exception;
+                    }
+
+                    throw new IllegalStateException(
+                            "Falha ao excluir imagem"
+                    );
+                });
+    }
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.PickVisualMedia(),
+                    uri -> {
+
+                        if (uri == null || !isAdded()) {
+                            return;
+                        }
+
+                        imgUri = uri;
+
+                        try {
+                            Bitmap original = MediaStore.Images.Media.getBitmap(
+                                    requireContext().getContentResolver(),
+                                    imgUri
+                            );
+
+                            ByteArrayOutputStream stream =
+                                    new ByteArrayOutputStream();
+
+                            original.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    30,
+                                    stream
+                            );
+
+                            imgProfilePic.setBackground(null);
+                            imgProfilePic.setImageBitmap(original);
+
+                            imageByte = stream.toByteArray();
+
+                            uploadImageToFirebase(imageByte);
+
+                        } catch (IOException | SecurityException e) {
+                            e.printStackTrace();
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    "Não foi possível carregar a imagem",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
+    public void showEmailPopup(View view) {
 
         EditEmail.setContentView(R.layout.popup_alteraremail);
 
-        edtCurrentEmail = EditEmail.findViewById(R.id.edtCurrentEmail);
-        btnModifyEmail = EditEmail.findViewById(R.id.btnModifyEmail);
-        edtNewEmail = EditEmail.findViewById(R.id.edtNewEmail);
-        edtConfirmNewEmail = EditEmail.findViewById(R.id.edtConfirmNewEmail);
-        edtPassword = EditEmail.findViewById(R.id.edtPassword);
+        EditText edtCurrentEmail =
+                EditEmail.findViewById(R.id.edtCurrentEmail);
 
-        btnModifyEmail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        EditText edtNewEmail =
+                EditEmail.findViewById(R.id.edtNewEmail);
 
-                if (edtCurrentEmail.getText().toString().equals(email) && edtPassword.getText().toString().equals(senhaAtual) && edtConfirmNewEmail.getText().toString().equals(edtNewEmail.getText().toString())) {
+        EditText edtConfirmNewEmail =
+                EditEmail.findViewById(R.id.edtConfirmNewEmail);
 
-                    AuthCredential credential = EmailAuthProvider.getCredential(email, senhaAtual);
+        EditText edtPassword =
+                EditEmail.findViewById(R.id.edtPassword);
 
-                    user.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Log.d("Sucesso", "Usuário re-autenticado");
+        Button btnModifyEmail =
+                EditEmail.findViewById(R.id.btnModifyEmail);
 
-                            user.updateEmail(edtNewEmail.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d("Sucesso", "Email Atualizado!");
-                                        Snackbar snackbar = Snackbar.make(view,"E-mail alterado com Sucesso!",Snackbar.LENGTH_SHORT);
-                                        snackbar.setBackgroundTint(Color.WHITE);
-                                        snackbar.setTextColor(Color.BLACK);
-                                        snackbar.show();
-                                        txtEmailProfile.setText(mAuth.getCurrentUser().getEmail());
-                                        email = edtNewEmail.getText().toString();
-                                    }
-                                }
-                            });
-                        }
-                    });
+        btnModifyEmail.setOnClickListener(v -> {
 
-                }else {
-                    Snackbar snackbar = Snackbar.make(view,"Verifique os dados inseridos",Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-                }
+            String emailInformado =
+                    edtCurrentEmail.getText().toString().trim();
+
+            String novoEmail =
+                    edtNewEmail.getText().toString().trim();
+
+            String confirmacaoEmail =
+                    edtConfirmNewEmail.getText().toString().trim();
+
+            String senhaInformada =
+                    edtPassword.getText().toString();
+
+            FirebaseUser currentUser =
+                    FirebaseAuth.getInstance().getCurrentUser();
+
+            if (currentUser == null || currentUser.getEmail() == null) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Usuário não autenticado",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
             }
+
+            String emailAtual = currentUser.getEmail();
+
+            if (emailInformado.isEmpty()
+                    || novoEmail.isEmpty()
+                    || confirmacaoEmail.isEmpty()
+                    || senhaInformada.isEmpty()) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Preencha todos os campos",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (!emailInformado.equalsIgnoreCase(emailAtual)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "O e-mail atual informado está incorreto",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (!novoEmail.equalsIgnoreCase(confirmacaoEmail)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Os novos e-mails não coincidem",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (novoEmail.equalsIgnoreCase(emailAtual)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Informe um e-mail diferente do atual",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            btnModifyEmail.setEnabled(false);
+
+            AuthCredential credential =
+                    EmailAuthProvider.getCredential(
+                            emailAtual,
+                            senhaInformada
+                    );
+
+            currentUser.reauthenticate(credential)
+                    .addOnCompleteListener(authTask -> {
+
+                        if (!authTask.isSuccessful()) {
+
+                            btnModifyEmail.setEnabled(true);
+
+                            if (isAdded()) {
+                                Toast.makeText(
+                                        requireContext(),
+                                        "Não foi possível confirmar sua senha atual",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+
+                            return;
+                        }
+
+                        currentUser.verifyBeforeUpdateEmail(novoEmail)
+                                .addOnCompleteListener(emailTask -> {
+
+                                    btnModifyEmail.setEnabled(true);
+
+                                    if (!isAdded()) {
+                                        return;
+                                    }
+
+                                    if (emailTask.isSuccessful()) {
+
+                                        Toast.makeText(
+                                                requireContext(),
+                                                "Enviamos um link de confirmação para o novo e-mail",
+                                                Toast.LENGTH_LONG
+                                        ).show();
+
+                                        EditEmail.dismiss();
+
+                                    } else {
+
+                                        Toast.makeText(
+                                                requireContext(),
+                                                "Não foi possível solicitar a alteração do e-mail",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
+
+                                        Log.e(
+                                                "FragmentoPerfil",
+                                                "Erro ao solicitar alteração de e-mail",
+                                                emailTask.getException()
+                                        );
+                                    }
+                                });
+                    });
         });
 
+        EditEmail.getWindow().setBackgroundDrawable(
+                new ColorDrawable(Color.TRANSPARENT)
+        );
 
-        EditEmail.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         EditEmail.show();
     }
 
     public void showPasswordPopup(View view) {
+
         Button btnModifyPassword;
-        EditText edtCurrentPassword, edtNewPassword, edtConfirmNewPassword;
+        EditText edtCurrentPassword;
+        EditText edtNewPassword;
+        EditText edtConfirmNewPassword;
 
         EditPassword.setContentView(R.layout.popup_alterarsenha);
 
@@ -367,299 +915,457 @@ public class FragmentoPerfil extends Fragment {
         edtNewPassword = EditPassword.findViewById(R.id.edtNewPassword);
         edtConfirmNewPassword = EditPassword.findViewById(R.id.edtConfirmNewPassword);
 
-        btnModifyPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        btnModifyPassword.setOnClickListener(v -> {
 
-                if (edtCurrentPassword.getText().toString().equals(senhaAtual) && edtConfirmNewPassword.getText().toString().equals(edtNewPassword.getText().toString())) {
+            String senhaInformada =
+                    edtCurrentPassword.getText().toString();
 
-                    AuthCredential credential = EmailAuthProvider.getCredential(email, senhaAtual);
+            String novaSenha =
+                    edtNewPassword.getText().toString();
 
-                    user.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            Log.d("Sucesso", "Usuário re-autenticado");
+            String confirmacaoSenha =
+                    edtConfirmNewPassword.getText().toString();
 
-                            user.updatePassword(edtNewPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        Log.d("Sucesso", "Senha Atualizada!");
-                                        Snackbar snackbar = Snackbar.make(view,"Senha alterada com Sucesso!",Snackbar.LENGTH_SHORT);
-                                        snackbar.setBackgroundTint(Color.WHITE);
-                                        snackbar.setTextColor(Color.BLACK);
-                                        snackbar.show();
-                                        senhaAtual = edtNewPassword.getText().toString();
-                                    }
-                                }
-                            });
-                        }
-                    });
+            // Validação básica dos campos
+            if (senhaInformada.isEmpty()
+                    || novaSenha.isEmpty()
+                    || confirmacaoSenha.isEmpty()) {
 
-                    db.collection("Usuario").document(FragmentoProduto.userID).update("senhaUsuario", edtNewPassword.getText().toString());
+                Toast.makeText(
+                        requireContext(),
+                        "Preencha todos os campos",
+                        Toast.LENGTH_SHORT
+                ).show();
 
-                }else {
-                    Snackbar snackbar = Snackbar.make(view,"Verifique os dados inseridos",Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-                }
+                return;
             }
+
+            // Validação de confirmação
+            if (!novaSenha.equals(confirmacaoSenha)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "As novas senhas não coincidem",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            // Validação mínima; o Firebase pode exigir
+            // uma política de senha mais restritiva.
+            if (novaSenha.length() < 6) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "A nova senha deve ter pelo menos 6 caracteres",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            FirebaseUser currentUser =
+                    FirebaseAuth.getInstance().getCurrentUser();
+
+            if (currentUser == null || currentUser.getEmail() == null) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Usuário não autenticado",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            btnModifyPassword.setEnabled(false);
+
+            // Usa a senha digitada pelo próprio usuário,
+            // não uma senha recuperada do Firestore.
+            AuthCredential credential =
+                    EmailAuthProvider.getCredential(
+                            currentUser.getEmail(),
+                            senhaInformada
+                    );
+
+            currentUser.reauthenticate(credential)
+                    .addOnCompleteListener(authTask -> {
+
+                        if (!authTask.isSuccessful()) {
+
+                            btnModifyPassword.setEnabled(true);
+
+                            if (isAdded()) {
+                                Toast.makeText(
+                                        requireContext(),
+                                        "Não foi possível confirmar sua senha atual",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+
+                            return;
+                        }
+
+                        // Só altera a senha depois da
+                        // reautenticação bem-sucedida.
+                        currentUser.updatePassword(novaSenha)
+                                .addOnCompleteListener(updateTask -> {
+
+                                    btnModifyPassword.setEnabled(true);
+
+                                    if (!isAdded()) {
+                                        return;
+                                    }
+
+                                    if (updateTask.isSuccessful()) {
+
+                                        Toast.makeText(
+                                                requireContext(),
+                                                "Senha alterada com sucesso!",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
+
+                                        EditPassword.dismiss();
+
+                                    } else {
+
+                                        Toast.makeText(
+                                                requireContext(),
+                                                "Não foi possível alterar a senha",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
+
+                                        Log.e(
+                                                "FragmentoPerfil",
+                                                "Erro ao atualizar senha",
+                                                updateTask.getException()
+                                        );
+                                    }
+                                });
+                    });
         });
 
-        EditPassword.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        EditPassword.getWindow().setBackgroundDrawable(
+                new ColorDrawable(Color.TRANSPARENT)
+        );
+
         EditPassword.show();
     }
 
     public void showDeletePopup(View view) {
-        EditText edtEmail, edtPassword, edtConfirmPassword;
-        Button btnDeleteAccountPopUp;
 
         DeleteAccount.setContentView(R.layout.popup_excluirconta);
 
-        edtEmail = DeleteAccount.findViewById(R.id.edtEmail);
-        edtPassword = DeleteAccount.findViewById(R.id.edtPassword);
-        edtConfirmPassword = DeleteAccount.findViewById(R.id.edtConfirmPassword);
-        btnDeleteAccountPopUp = DeleteAccount.findViewById(R.id.btnDeleteAccountPopUp);
+        EditText edtEmail =
+                DeleteAccount.findViewById(R.id.edtEmail);
 
-        btnDeleteAccountPopUp.setOnClickListener(new View.OnClickListener() {
+        EditText edtPassword =
+                DeleteAccount.findViewById(R.id.edtPassword);
+
+        EditText edtConfirmPassword =
+                DeleteAccount.findViewById(R.id.edtConfirmPassword);
+
+        Button btnDeleteAccountPopUp =
+                DeleteAccount.findViewById(R.id.btnDeleteAccountPopUp);
+
+        btnDeleteAccountPopUp.setOnClickListener(v -> {
+
+            String emailInformado =
+                    edtEmail.getText().toString().trim();
+
+            String senhaInformada =
+                    edtPassword.getText().toString();
+
+            String confirmacaoSenha =
+                    edtConfirmPassword.getText().toString();
+
+            FirebaseUser currentUser =
+                    FirebaseAuth.getInstance().getCurrentUser();
+
+            if (currentUser == null || currentUser.getEmail() == null) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Usuário não autenticado",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            String emailAtual = currentUser.getEmail();
+
+            if (emailInformado.isEmpty()
+                    || senhaInformada.isEmpty()
+                    || confirmacaoSenha.isEmpty()) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "Preencha todos os campos",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (!emailInformado.equalsIgnoreCase(emailAtual)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "O e-mail informado está incorreto",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            if (!senhaInformada.equals(confirmacaoSenha)) {
+
+                Toast.makeText(
+                        requireContext(),
+                        "As senhas informadas não coincidem",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            btnDeleteAccountPopUp.setEnabled(false);
+
+            AuthCredential credential =
+                    EmailAuthProvider.getCredential(
+                            emailAtual,
+                            senhaInformada
+                    );
+
+            currentUser.reauthenticate(credential)
+                    .addOnCompleteListener(task -> {
+
+                        btnDeleteAccountPopUp.setEnabled(true);
+
+                        if (!isAdded()) {
+                            return;
+                        }
+
+                        if (task.isSuccessful()) {
+
+                            DeleteAccount.dismiss();
+
+                            showWarningPopup();
+
+                        } else {
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    "Não foi possível confirmar suas credenciais",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+
+                            Log.e(
+                                    "FragmentoPerfil",
+                                    "Falha na reautenticação para exclusão",
+                                    task.getException()
+                            );
+                        }
+                    });
+        });
+
+        DeleteAccount.getWindow().setBackgroundDrawable(
+                new ColorDrawable(Color.TRANSPARENT)
+        );
+
+        DeleteAccount.show();
+    }
+    public void showWarningPopup() {
+
+        Warning.setContentView(R.layout.popup_aviso);
+
+        Button btnReturn =
+                Warning.findViewById(R.id.btnReturn);
+
+        Button btnConfirm =
+                Warning.findViewById(R.id.btnConfirm);
+
+        TextView txtCount =
+                Warning.findViewById(R.id.txtCount);
+
+        btnConfirm.setEnabled(false);
+
+        btnConfirm.setBackgroundDrawable(
+                ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.custom_button_warning
+                )
+        );
+
+        new CountDownTimer(6000, 1000) {
+
             @Override
-            public void onClick(View view) {
-                if (edtEmail.getText().toString().equals(email) && edtPassword.getText().toString().equals(senhaAtual) && edtConfirmPassword.getText().toString().equals(edtPassword.getText().toString())) {
-                    DeleteAccount.dismiss();
-                    showWarningPopup();
+            public void onTick(long millisUntilFinished) {
 
-                }else {
-                    Snackbar snackbar = Snackbar.make(view,"Verifique os dados inseridos",Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
+                txtCount.setText(
+                        String.valueOf(
+                                millisUntilFinished / 1000
+                        )
+                );
+            }
+
+            @Override
+            public void onFinish() {
+
+                txtCount.setText("");
+
+                btnConfirm.setEnabled(true);
+
+                btnConfirm.setBackgroundDrawable(
+                        ContextCompat.getDrawable(
+                                requireContext(),
+                                R.drawable.custom_button
+                        )
+                );
+            }
+
+        }.start();
+
+        btnReturn.setOnClickListener(v -> {
+
+            Warning.dismiss();
+
+        });
+
+        btnConfirm.setOnClickListener(v -> {
+
+            btnConfirm.setEnabled(false);
+
+            FirebaseUser currentUser =
+                    FirebaseAuth.getInstance()
+                            .getCurrentUser();
+
+            if (currentUser == null) {
+
+                showDeleteError(
+                        "Usuário não autenticado",
+                        null
+                );
+
+                return;
+            }
+
+            boolean googleAccount = false;
+
+            for (com.google.firebase.auth.UserInfo provider
+                    : currentUser.getProviderData()) {
+
+                if ("google.com".equals(provider.getProviderId())) {
+
+                    googleAccount = true;
+                    break;
                 }
+            }
+
+            if (googleAccount) {
+
+                reauthenticateGoogleForDeletion();
+
+            } else {
+
+                // Para e-mail/senha, a reautenticação
+                // já ocorreu em showDeletePopup().
+
+                deleteUserAccount();
             }
         });
 
-        DeleteAccount.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        DeleteAccount.show();
+        Warning.show();
 
-    }
-    public void showWarningPopup() {
-        if (Login.GoogleLogin == 1) {
-            Button btnReturn, btnConfirm;
-            TextView txtCount;
-            Warning.setContentView(R.layout.popup_aviso);
+        if (Warning.getWindow() != null) {
 
-            txtCount = Warning.findViewById(R.id.txtCount);
-            btnReturn = Warning.findViewById(R.id.btnReturn);
-            btnConfirm = Warning.findViewById(R.id.btnConfirm);
-            btnConfirm.setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.drawable.custom_button_warning));
-            btnConfirm.setEnabled(false);
-            System.out.println("Id usuario"+FragmentoProduto.userID);
-            new CountDownTimer(6000, 1000) {
-                @Override
-                public void onTick(long l) {
-                    txtCount.setText(""+l / 1000);
-                }
-                @Override
-                public void onFinish() {
-                    txtCount.setText("");
-                    btnConfirm.setEnabled(true);
-                    btnConfirm.setBackgroundDrawable(ContextCompat.getDrawable(getContext(),R.drawable.custom_button ));
-                }
-            }.start();
-            btnReturn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Warning.dismiss();
-                }
-            });
-            btnConfirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    db.collection("Usuario").document(FragmentoProduto.userID).delete();
-
-                    StorageReference referenceProfilePhoto = mStorage.child(FragmentoProduto.userID+"/"+FragmentoProduto.userID+".png");
-                    referenceProfilePhoto.delete();
-
-                    db.collection("Produto").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-
-                                StorageReference storageReference = mStorage.child(FragmentoProduto.userID+"/Produtos/"+document.getString("idProduto")+".png");
-                                storageReference.delete();
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    db.collection("ListaIngrediente").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    db.collection("OutrosCustos").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAuth.getCurrentUser().delete();
-                            exitDelete();
-                        }
-                    }, 1000);
-
-
-                }
-            });
-            Warning.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            Warning.show();
-        }else {
-            Button btnReturn, btnConfirm;
-            Warning.setContentView(R.layout.popup_aviso);
-            StorageReference storageReference = mStorage.child(FragmentoProduto.userID+"/");
-            btnReturn = Warning.findViewById(R.id.btnReturn);
-            btnConfirm = Warning.findViewById(R.id.btnConfirm);
-            btnReturn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Warning.dismiss();
-                    showDeletePopup(view);
-                }
-            });
-            btnConfirm.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    db.collection("Usuario").document(FragmentoProduto.userID).delete();
-
-                    StorageReference referenceProfilePhoto = mStorage.child(FragmentoProduto.userID+"/"+FragmentoProduto.userID+".png");
-                    referenceProfilePhoto.delete();
-
-                    db.collection("Produto").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                StorageReference storageReference = mStorage.child(FragmentoProduto.userID+"/Produtos/"+document.getString("idProduto")+".png");
-                                storageReference.delete();
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    db.collection("ListaIngrediente").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    db.collection("OutrosCustos").whereEqualTo("idUsuario", FragmentoProduto.userID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                document.getReference().delete();
-                            }
-                        }
-                    });
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            mAuth.getCurrentUser().delete();
-                            exitDelete();
-                        }
-                    }, 1000);
-                }
-            });
-            Warning.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            Warning.show();
+            Warning.getWindow().setBackgroundDrawable(
+                    new ColorDrawable(Color.TRANSPARENT)
+            );
         }
     }
     private void Exit() {
-        if (Login.GoogleLogin == 1) {
-            mAuth.signOut();
-            GoogleSignInOptions gso = new GoogleSignInOptions.
-                    Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
-                    build();
-            GoogleSignInClient googleSignInClient=GoogleSignIn.getClient(getContext(),gso);
-            googleSignInClient.signOut();
-            Intent intent = new Intent(getActivity(), Login.class);
-            reload = 1;
-            startActivity(intent);
-            Login.GoogleLogin = 0;
-            getActivity().finish();
-        }else {
-            Intent intent = new Intent(getActivity(), Login.class);
-            mAuth.signOut();
-            reload = 1;
-            startActivity(intent);
-            Login.GoogleLogin = 0;
-            getActivity().finish();
-        }
-        }
-    private void exitDelete() {
-        if (Login.GoogleLogin == 1 ) {
-            Intent intent = new Intent(getActivity(), Login.class);
-            mAuth.signOut();
-            GoogleSignInOptions gso = new GoogleSignInOptions.
-                    Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).
-                    build();
-            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(getContext(), gso);
-            googleSignInClient.signOut();
-            startActivity(intent);
-            Login.GoogleLogin = 0;
-            reload = 1;
-            getActivity().finish();
-        }else {
-            Intent intent = new Intent(getActivity(), Login.class);
-            mAuth.signOut();
-            reload = 1;
-            startActivity(intent);
-            Login.GoogleLogin = 0;
-            getActivity().finish();
-        }
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1000){
-            if (resultCode == Activity.RESULT_OK){
-                imgUri = data.getData();
-                try {
-                    Bitmap original = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(),imgUri);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    original.compress(Bitmap.CompressFormat.JPEG, 30,stream);
-                    imgProfilePic.setBackground(null);
-                    imgProfilePic.setImageBitmap(original);
-                    imageByte = stream.toByteArray();
-                    uploadImageToFirebase(imageByte);
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        boolean googleAccount = Login.GoogleLogin == 1;
+
+        if (currentUser != null) {
+
+            for (com.google.firebase.auth.UserInfo provider
+                    : currentUser.getProviderData()) {
+
+                if ("google.com".equals(provider.getProviderId())) {
+
+                    googleAccount = true;
+                    break;
                 }
             }
         }
+
+        // Encerra a sessão do Firebase Authentication.
+        mAuth.signOut();
+
+        Login.GoogleLogin = 0;
+
+        if (googleAccount) {
+
+            GoogleSignInOptions gso =
+                    new GoogleSignInOptions.Builder(
+                            GoogleSignInOptions.DEFAULT_SIGN_IN
+                    ).build();
+
+            GoogleSignInClient googleSignInClient =
+                    GoogleSignIn.getClient(
+                            requireActivity(),
+                            gso
+                    );
+
+            googleSignInClient.signOut()
+                    .addOnCompleteListener(task -> {
+
+                        if (!task.isSuccessful()) {
+
+                            Log.w(
+                                    "FragmentoPerfil",
+                                    "Falha ao encerrar sessão Google",
+                                    task.getException()
+                            );
+                        }
+
+                        openLoginAfterLogout();
+                    });
+
+        } else {
+
+            openLoginAfterLogout();
+        }
+    }
+    private void openLoginAfterLogout() {
+
+        if (!isAdded()) {
+            return;
+        }
+
+        Intent intent = new Intent(
+                requireActivity(),
+                Login.class
+        );
+
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+        );
+
+        startActivity(intent);
+    }
+
+    private void exitDelete() {
+
+        Exit();
+
     }
     private void uploadImageToFirebase(byte[] imageByte) {
         StorageReference fileRef = mStorage.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+FirebaseAuth.getInstance().getCurrentUser().getUid()+".png");

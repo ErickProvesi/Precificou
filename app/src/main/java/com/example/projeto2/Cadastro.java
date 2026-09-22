@@ -7,11 +7,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.method.HideReturnsTransformationMethod;
@@ -23,6 +21,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -34,21 +35,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -66,8 +61,53 @@ public class Cadastro extends AppCompatActivity {
     private CircleImageView imgProfileRegister;
     StorageReference storageReference;
 
+    private boolean registrationInProgress = false;
+    private boolean authCreatedHere = false;
+
     private Uri imgUri;
     byte[] imageByte;
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.PickVisualMedia(),
+                    uri -> {
+                        if (uri == null) {
+                            return;
+                        }
+
+                        imgUri = uri;
+
+                        try {
+                            Bitmap original = MediaStore.Images.Media.getBitmap(
+                                    getContentResolver(),
+                                    imgUri
+                            );
+
+                            ByteArrayOutputStream stream =
+                                    new ByteArrayOutputStream();
+
+                            original.compress(
+                                    Bitmap.CompressFormat.JPEG,
+                                    30,
+                                    stream
+                            );
+
+                            imgProfileRegister.setBackground(null);
+                            imgProfileRegister.setImageBitmap(original);
+
+                            imageByte = stream.toByteArray();
+
+                        } catch (IOException | SecurityException e) {
+                            e.printStackTrace();
+
+                            Toast.makeText(
+                                    Cadastro.this,
+                                    "Não foi possível carregar a imagem",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,14 +162,17 @@ public class Cadastro extends AppCompatActivity {
             }
         });
 
-        imgProfileRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        imgProfileRegister.setOnClickListener(view -> {
 
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickImageLauncher.launch(
+                    new PickVisualMediaRequest.Builder()
+                            .setMediaType(
+                                    ActivityResultContracts.PickVisualMedia
+                                            .ImageOnly.INSTANCE
+                            )
+                            .build()
+            );
 
-                startActivityForResult(intent, 1000);
-            }
         });
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
@@ -168,96 +211,162 @@ public class Cadastro extends AppCompatActivity {
     }
     private void UserRegister(View view) {
 
+        if (registrationInProgress) {
+            return;
+        }
+
+        registrationInProgress = true;
+
+        pgbRegister.setVisibility(View.VISIBLE);
+        btnRegister.setEnabled(false);
+
+        // Se a conta já foi criada nesta tela, mas houve
+        // falha ao salvar o perfil, tentamos novamente
+        // somente a gravação dos dados.
+
+        if (authCreatedHere
+                && FirebaseAuth.getInstance().getCurrentUser() != null) {
+
+            SaveUserData();
+            return;
+        }
+
         String senha = edtPasswordRegister.getText().toString();
         String email = edtEmailRegister.getText().toString();
 
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,senha).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
+        FirebaseAuth.getInstance()
+                .createUserWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(task -> {
 
-                if (task.isSuccessful()){
-                    pgbRegister.setVisibility(View.VISIBLE);
+                    if (task.isSuccessful()) {
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
+                        authCreatedHere = true;
 
-                            SaveUserData();
-                            if (imageByte != null) {
-                            uploadImageToFirebase(imageByte);
-                            }else {
+                        SaveUserData();
 
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Snackbar snackbar = Snackbar.make(view,messages[1],Snackbar.LENGTH_SHORT);
-                                    snackbar.setBackgroundTint(Color.WHITE);
-                                    snackbar.setTextColor(Color.BLACK);
-                                    snackbar.show();
+                    } else {
 
-                                    GoLoginScreen();
-                                }
-                            }, 3000);
+                        registrationInProgress = false;
+
+                        pgbRegister.setVisibility(View.GONE);
+                        btnRegister.setEnabled(true);
+
+                        Exception exception = task.getException();
+
+                        String erro;
+
+                        if (exception instanceof FirebaseAuthWeakPasswordException) {
+
+                            erro = "Digite uma senha com no mínimo 6 caracteres";
+
+                        } else if (exception instanceof FirebaseAuthUserCollisionException) {
+
+                            erro = "Esta conta já foi cadastrada";
+
+                        } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+
+                            erro = "E-mail inválido";
+
+                        } else {
+
+                            erro = "Erro ao cadastrar usuário";
+
                         }
-                        }
 
-                    },0);
-                }else {
-                    String erro;
-                    try {
-                        throw task.getException();
+                        Snackbar snackbar = Snackbar.make(
+                                view,
+                                erro,
+                                Snackbar.LENGTH_SHORT
+                        );
 
-                    }catch (FirebaseAuthWeakPasswordException e) {
-                        erro = "Digite uma senha com no mínimo 6 caracteres";
+                        snackbar.setBackgroundTint(Color.WHITE);
+                        snackbar.setTextColor(Color.BLACK);
 
-                    }catch (FirebaseAuthUserCollisionException e) {
-                        erro = "Esta conta já foi cadastrada";
+                        snackbar.show();
 
-                    }catch (FirebaseAuthInvalidCredentialsException e) {
-                        erro = "E-mail inválido";
-
-                    }catch(Exception e){
-                        erro = "Erro ao cadastrar usuário";
-
+                        Log.e(
+                                "Cadastro",
+                                "Erro no Authentication",
+                                exception
+                        );
                     }
-
-                    Snackbar snackbar = Snackbar.make(view,erro,Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-
-                }
-            }
-        });
+                });
     }
     private void SaveUserData() {
+
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
+
+        if (currentUser == null) {
+
+            registrationInProgress = false;
+
+            pgbRegister.setVisibility(View.GONE);
+            btnRegister.setEnabled(true);
+
+            Toast.makeText(
+                    this,
+                    "Sessão expirada. Faça login novamente.",
+                    Toast.LENGTH_LONG
+            ).show();
+
+            return;
+        }
+
         String nome = edtNameRegister.getText().toString();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        userID = currentUser.getUid();
 
         Map<String, Object> users = new HashMap<>();
+
         users.put("nomeUsuario", nome);
         users.put("idUsuario", userID);
         users.put("fotoUsuario", "");
-        users.put("senhaUsuario", edtPasswordRegister.getText().toString());
         users.put("emailUsuario", edtEmailRegister.getText().toString());
 
+        DocumentReference documentReference =
+                db.collection("Usuario").document(userID);
 
+        documentReference.set(users)
 
-        DocumentReference documentReference = db.collection("Usuario").document(userID);
-        documentReference.set(users).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                Log.d("db", "Sucesso ao salvar os dados");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    Log.d("db_error" ,"Erro ao salvar os dados" + e.toString());
+                .addOnSuccessListener(unused -> {
+
+                    Log.d(
+                            "Cadastro",
+                            "Perfil salvo no Firestore"
+                    );
+
+                    if (imageByte != null) {
+
+                        uploadImageToFirebase(imageByte);
+
+                    } else {
+
+                        finishRegistration();
                     }
+
+                })
+
+                .addOnFailureListener(e -> {
+
+                    Log.e(
+                            "Cadastro",
+                            "Erro ao salvar perfil no Firestore",
+                            e
+                    );
+
+                    registrationInProgress = false;
+
+                    pgbRegister.setVisibility(View.GONE);
+                    btnRegister.setEnabled(true);
+
+                    Toast.makeText(
+                            this,
+                            "Conta criada, mas houve erro ao salvar o perfil. Toque em cadastrar para tentar novamente.",
+                            Toast.LENGTH_LONG
+                    ).show();
                 });
     }
     private void GoLoginScreen() {
@@ -266,43 +375,78 @@ public class Cadastro extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    private void uploadImageToFirebase(byte[] imageByte) {
 
-        if (requestCode == 1000){
-            if (resultCode == Activity.RESULT_OK){
-                imgUri = data.getData();
-                try {
-                    Bitmap original = MediaStore.Images.Media.getBitmap(getContentResolver(),imgUri);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    original.compress(Bitmap.CompressFormat.JPEG, 30,stream);
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
 
-                    imgProfileRegister.setBackground(null);
-                    imgProfileRegister.setImageBitmap(original);
-                    imageByte = stream.toByteArray();
+        if (currentUser == null) {
 
+            registrationInProgress = false;
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            pgbRegister.setVisibility(View.GONE);
+            btnRegister.setEnabled(true);
 
-            }
+            return;
         }
+
+        String uid = currentUser.getUid();
+
+        StorageReference fileRef =
+                storageReference.child(
+                        uid + "/" + uid + ".png"
+                );
+
+        fileRef.putBytes(imageByte)
+
+                .addOnSuccessListener(taskSnapshot -> {
+
+                    Log.d(
+                            "Cadastro",
+                            "Imagem enviada com sucesso"
+                    );
+
+                    finishRegistration();
+
+                })
+
+                .addOnFailureListener(e -> {
+
+                    Log.e(
+                            "Cadastro",
+                            "Erro ao enviar foto de perfil",
+                            e
+                    );
+
+                    // A foto é opcional. A conta e o perfil
+                    // já foram criados com sucesso.
+
+                    Toast.makeText(
+                            this,
+                            "Conta criada, mas não foi possível enviar a foto. Você poderá adicioná-la no perfil.",
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    finishRegistration();
+                });
     }
 
-    private void uploadImageToFirebase(byte[] imageByte) {
-    StorageReference fileRef = storageReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid()+"/"+FirebaseAuth.getInstance().getCurrentUser().getUid()+".png");
-    fileRef.putBytes(imageByte).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-        @Override
-        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-            Toast.makeText(getApplicationContext(), "Imagem enviada com sucesso", Toast.LENGTH_SHORT);
-        }
-    }).addOnFailureListener(new OnFailureListener() {
-        @Override
-        public void onFailure(@NonNull Exception e) {
-            Toast.makeText(getApplicationContext(), "Erro ao enviar imagem", Toast.LENGTH_SHORT);
-        }
-    });
+    private void finishRegistration() {
+
+        registrationInProgress = false;
+
+        pgbRegister.setVisibility(View.GONE);
+
+        btnRegister.setEnabled(true);
+
+        Toast.makeText(
+                this,
+                "Cadastro realizado com sucesso!",
+                Toast.LENGTH_SHORT
+        ).show();
+
+        FirebaseAuth.getInstance().signOut();
+
+        GoLoginScreen();
     }
 }
