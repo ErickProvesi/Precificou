@@ -174,7 +174,6 @@ fun LoginScreen(
                                     painter = painterResource(id = R.drawable.logo_precificou),
                                     contentDescription = "Logo Precificou",
                                     modifier = Modifier
-                                        .size(78.dp)
                                         .clip(RoundedCornerShape(18.dp)),
                                     contentScale = ContentScale.Fit
                                 )

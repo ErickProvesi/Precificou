@@ -1,6 +1,4 @@
 package com.example.projeto2.ui
-
-import android.view.ViewGroup
 import android.widget.Toast
 
 import androidx.appcompat.app.AppCompatActivity
@@ -59,13 +57,7 @@ object LoginComposeHost {
             }
         }
 
-        activity.addContentView(
-            composeView,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        activity.setContentView(composeView)
         return BiConsumer { message, shouldHighlight ->
             loginError.value = message
             highlightFields.value = shouldHighlight
