@@ -6,6 +6,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -78,9 +83,15 @@ fun LoginScreen(
     onGoogleClick: () -> Unit = {},
     onRegisterClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
-    darkTheme: Boolean? = null
+    darkTheme: Boolean? = null,
+    errorMessage: String? = null,
+    highlightFields: Boolean = false,
+    onInputChange: () -> Unit = {},
+
 ) {
     val isDark = darkTheme ?: isSystemInDarkTheme()
+
+    var isLoading by rememberSaveable { mutableStateOf(false) }
 
     val backgroundColor = if (isDark) DarkBackground else LightBackground
     val cardColor = if (isDark) DarkCard else Color.White
@@ -88,6 +99,12 @@ fun LoginScreen(
     val subtitleColor = if (isDark) Color(0xFFD7D7D7) else Color(0xFF555555)
     val borderColor = if (isDark) Color(0xFF3C3C3C) else Color(0xFFDADADA)
     val googleButtonBorder = if (isDark) Color(0xFF4A4A4A) else Color(0xFFD3D3D3)
+
+    LaunchedEffect(errorMessage) {
+        if (errorMessage != null) {
+            isLoading = false
+        }
+    }
 
     val colors = if (isDark) {
         darkColorScheme(
@@ -185,21 +202,44 @@ fun LoginScreen(
 
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it },
+                            onValueChange = {
+                                email = it
+                                onInputChange()
+                            },
                             label = { Text("E-mail") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Email
                             ),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(16.dp),
+                            isError = highlightFields,
+
                         )
+
+                        AnimatedVisibility(
+                            visible = errorMessage != null,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            Text(
+                                text = errorMessage.orEmpty(),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp)
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(14.dp))
 
                         OutlinedTextField(
                             value = password,
-                            onValueChange = { password = it },
+                            onValueChange = {
+                                password = it
+                                onInputChange()
+                            },
                             label = { Text("Senha") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
@@ -228,7 +268,9 @@ fun LoginScreen(
                                     )
                                 }
                             },
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(16.dp),
+                            isError = highlightFields,
+
                         )
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -245,22 +287,49 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Button(
-                            onClick = { onLoginClick(email.trim(), password) },
-                            enabled = email.isNotBlank() && password.isNotBlank(),
+                            onClick = {
+                                if (!isLoading) {
+                                    isLoading = true
+                                    onLoginClick(email.trim(), password)
+                                }
+                            },
+                            enabled = email.isNotBlank() &&
+                                    password.isNotBlank() &&
+                                    !isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(54.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = PrecificouYellow,
-                                contentColor = Color.Black
+                                contentColor = Color.Black,
+                                disabledContainerColor = if (isLoading) {
+                                    PrecificouYellow
+                                } else if (isDark) {
+                                    Color(0xFF383838)
+                                } else {
+                                    Color(0xFFEAEAEA)
+                                },
+                                disabledContentColor = Color.Gray
                             )
                         ) {
-                            Text(
-                                text = "Entrar",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+
+                            if (isLoading) {
+
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(22.dp),
+                                    color = Color.Black,
+                                    strokeWidth = 2.dp
+                                )
+
+                            } else {
+
+                                Text(
+                                    text = "Entrar",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(22.dp))

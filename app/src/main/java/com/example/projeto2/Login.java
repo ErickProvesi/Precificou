@@ -9,6 +9,8 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import com.example.projeto2.ui.LoginComposeHost;
+import java.util.function.BiConsumer;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -61,6 +63,7 @@ import java.util.Map;
 
 public class Login extends AppCompatActivity {
 
+    private BiConsumer<String, Boolean> composeError;
     private TextView txtForgotPassword, txtGoRegister;
     private EditText edtEmail, edtPassword;
     private Button btnLogin, btnGoogleLogin;
@@ -156,6 +159,24 @@ public class Login extends AppCompatActivity {
             }
         });
 
+        // Exibe a nova interface do login em Jetpack Compose
+        composeError = LoginComposeHost.show(this);
+
+    }
+
+    // Abre o cadastro pela interface Compose
+    public void openRegistrationFromCompose() {
+        registrationScreen();
+    }
+
+    // Abre a recuperação de senha pela interface Compose
+    public void openForgotPasswordFromCompose() {
+        Intent intent = new Intent(
+                Login.this,
+                EsqueceuSenha.class
+        );
+
+        startActivity(intent);
     }
 
         //Métodos login com google
@@ -166,23 +187,66 @@ public class Login extends AppCompatActivity {
         openActivity.launch(intent);
     }
 
+    // Abre o Google Sign-In pela interface Compose
+    public void openGoogleFromCompose() {
+        LoginGoogle();
+    }
+
     ActivityResultLauncher<Intent> openActivity = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == Activity.RESULT_OK) {
-                    Intent intent = result.getData();
 
-                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
-                    try {
-                        GoogleSignInAccount account = task.getResult(ApiException.class);
-                        loginWithGoogle(account.getIdToken());
-                    }catch (ApiException exception){
-                        Log.d("Erro", exception.toString());
+                Log.d(
+                        "PrecificouGoogle",
+                        "Google Sign-In retornou. resultCode: "
+                                + result.getResultCode()
+                );
+
+                Intent intent = result.getData();
+
+                Task<GoogleSignInAccount> task =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent);
+
+                try {
+
+                    GoogleSignInAccount account =
+                            task.getResult(ApiException.class);
+
+                    if (account == null) {
+                        Log.e(
+                                "PrecificouGoogle",
+                                "Google retornou uma conta nula"
+                        );
+                        return;
                     }
 
+                    if (account.getIdToken() == null) {
+                        Log.e(
+                                "PrecificouGoogle",
+                                "Google retornou conta sem ID Token"
+                        );
+                        return;
+                    }
+
+                    Log.d(
+                            "PrecificouGoogle",
+                            "Google Sign-In retornou conta e ID Token"
+                    );
+
+                    loginWithGoogle(account.getIdToken());
+
+                } catch (ApiException exception) {
+
+                    Log.e(
+                            "PrecificouGoogle",
+                            "Falha Google Sign-In. Código: "
+                                    + exception.getStatusCode()
+                                    + " | Mensagem: "
+                                    + exception.getMessage(),
+                            exception
+                    );
                 }
             }
-
     );
 
     private void loginWithGoogle(String token) {
@@ -269,44 +333,118 @@ public class Login extends AppCompatActivity {
         //Autenticar Usuário e ir Login
 
     private void AuthenticateUser(View v) {
-        String email = edtEmail.getText().toString();
-        String senha = edtPassword.getText().toString();
+        AuthenticateUser(
+                v,
+                edtEmail.getText().toString(),
+                edtPassword.getText().toString()
+        );
+    }
 
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email,senha).addOnCompleteListener(task -> {
+    // Chamado pela nova interface Compose
+    public void authenticateFromCompose(String email, String senha) {
+        AuthenticateUser(null, email.trim(), senha);
+    }
 
-            if (task.isSuccessful()) {
-               pgbLogin.setVisibility(View.VISIBLE);
+    // Autenticação compartilhada entre XML e Compose
+    private void AuthenticateUser(
+            @Nullable View v,
+            String email,
+            String senha
+    ) {
 
-               new Handler().postDelayed(() -> {
-                   Toast toast = Toast.makeText(getApplicationContext(), "Login efetuado com Sucesso.", Toast.LENGTH_SHORT);
-                   toast.show();
-                   FirebaseUser user = mAuth.getCurrentUser();
-                   String strProvider = user.getProviderData().get(user.getProviderData().size() - 1).getProviderId();
-                   if (strProvider.equals("google.com")) {
-                       Login.GoogleLogin = 1;
-                   }
-                   mainScreen();
+        if (email.isEmpty() || senha.isEmpty()) {
+            Toast.makeText(
+                    this,
+                    "Preencha todos os campos",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
 
-               },2000);
+        mAuth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this, task -> {
 
-            }else {
-                String error;
-                try {
-                    throw task.getException();
+                    if (task.isSuccessful()) {
 
-                }catch (FirebaseAuthInvalidCredentialsException e) {
-                    error = "E-mail ou Senha inválido(s)";
+                        Runnable finalizarLogin = () -> {
 
-                }catch (Exception e){
-                    error = "Erro ao logar usuário";
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "Login efetuado com sucesso.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
 
-                }
-                Snackbar snackbar = Snackbar.make(v,error,Snackbar.LENGTH_SHORT);
-                snackbar.setBackgroundTint(Color.WHITE);
-                snackbar.setTextColor(Color.BLACK);
-                snackbar.show();
-            }
-        });
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            if (user != null) {
+
+                                String strProvider = user.getProviderData()
+                                        .get(user.getProviderData().size() - 1)
+                                        .getProviderId();
+
+                                if (strProvider.equals("google.com")) {
+                                    Login.GoogleLogin = 1;
+                                }
+                            }
+
+                            mainScreen();
+                        };
+
+                        if (v == null) {
+
+                            // Compose: navega sem a espera artificial
+                            finalizarLogin.run();
+
+                        } else {
+
+                            // Comportamento temporário do XML antigo
+                            pgbLogin.setVisibility(View.VISIBLE);
+
+                            new Handler().postDelayed(
+                                    finalizarLogin,
+                                    2000
+                            );
+                        }
+
+                    } else {
+
+                        Exception exception = task.getException();
+
+                        String error =
+                                exception instanceof FirebaseAuthInvalidCredentialsException
+                                        ? "E-mail ou senha inválido(s)"
+                                        : "Erro ao logar usuário";
+
+                        if (v == null) {
+
+                            boolean invalidCredentials =
+                                    exception instanceof FirebaseAuthInvalidCredentialsException;
+
+                            if (composeError != null) {
+
+                                composeError.accept(
+                                        invalidCredentials
+                                                ? "Confira o e-mail e a senha e tente novamente."
+                                                : "Não foi possível entrar. Tente novamente.",
+                                        invalidCredentials
+                                );
+                            }
+
+                        } else {
+
+                            // Feedback da interface XML antiga
+                            Snackbar snackbar = Snackbar.make(
+                                    v,
+                                    error,
+                                    Snackbar.LENGTH_SHORT
+                            );
+
+                            snackbar.setBackgroundTint(Color.WHITE);
+                            snackbar.setTextColor(Color.BLACK);
+                            snackbar.show();
+                        }
+                    }
+                });
     }
 
         //On Start
