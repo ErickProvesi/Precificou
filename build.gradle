@@ -6,11 +6,17 @@ buildscript {
     dependencies {
         classpath 'com.google.gms:google-services:4.3.14'
     }
-}// Top-level build file where you can add configuration options common to all sub-projects/modules.
+}
 plugins {
     id 'com.android.application' version '8.13.2' apply false
     id 'com.android.library' version '8.13.2' apply false
     id 'com.google.gms.google-services' version '4.3.14' apply false
+
+    // Kotlin
+    id 'org.jetbrains.kotlin.android' version '2.4.0' apply false
+
+    // Jetpack Compose
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.3.21' apply false
 }
 
 task clean(type: Delete) {
