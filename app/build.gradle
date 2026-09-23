@@ -51,6 +51,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.activity:activity:1.9.3'
+    implementation "androidx.compose.material:material-icons-extended"
 
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:30.3.2')
