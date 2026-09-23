@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = 'com.example.projeto2'
+    namespace = 'com.erickprovesi.precificou'
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.projeto2"
+        applicationId = "com.erickprovesi.precificou"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
