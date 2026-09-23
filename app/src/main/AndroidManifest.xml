@@ -15,7 +15,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Projeto2"
+        android:theme="@style/Theme.Precificou"
         tools:targetApi="31">
         <activity
             android:name=".Perfil_Produto"
@@ -28,7 +28,14 @@
             android:exported="false" />
         <activity
             android:name=".Login"
-            android:exported="false" />
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".Perfil"
             android:exported="false" />
@@ -44,15 +51,6 @@
         <activity
             android:name=".activity_perfil_produto_detalhes"
             android:exported="false" />
-        <activity
-            android:name=".splash"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
