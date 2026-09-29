@@ -10,9 +10,11 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
+import android.graphics.ImageDecoder;
 import android.util.Log;
 import android.view.View;
 import com.erickprovesi.precificou.ui.CadastroComposeHost;
+import com.erickprovesi.precificou.ui.CadastroUiStateHandle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -44,6 +46,7 @@ public class Cadastro extends AppCompatActivity {
 
     private EditText edtPasswordRegister, edtNameRegister, edtConfirmPassword, edtEmailRegister;
     private Button btnRegister;
+    private CadastroUiStateHandle composeUi;
     private String[] messages = {"Preencha todos os campos.", "Cadastro realizado com sucesso.", "As senhas não correspondem.", "Nome muito longo."};
     private String userID;
     private ImageView imgBack;
@@ -84,9 +87,18 @@ public class Cadastro extends AppCompatActivity {
                         imgUri = uri;
 
                         try {
-                            Bitmap original = MediaStore.Images.Media.getBitmap(
-                                    getContentResolver(),
-                                    imgUri
+                            ImageDecoder.Source source =
+                                    ImageDecoder.createSource(
+                                            getContentResolver(),
+                                            imgUri
+                                    );
+
+                            Bitmap original = ImageDecoder.decodeBitmap(
+                                    source,
+                                    (decoder, info, src) ->
+                                            decoder.setAllocator(
+                                                    ImageDecoder.ALLOCATOR_SOFTWARE
+                                            )
                             );
 
                             ByteArrayOutputStream stream =
@@ -102,6 +114,10 @@ public class Cadastro extends AppCompatActivity {
                             imgProfileRegister.setImageBitmap(original);
 
                             imageByte = stream.toByteArray();
+
+                            if (composeUi != null) {
+                                composeUi.setProfileImage(original);
+                            }
 
                         } catch (IOException | SecurityException e) {
                             e.printStackTrace();
@@ -214,8 +230,60 @@ public class Cadastro extends AppCompatActivity {
                 }
         });
 
-        CadastroComposeHost.show(this);
+        composeUi = CadastroComposeHost.show(this);
 
+    }
+
+    public void registerFromCompose(
+            String name,
+            String email,
+            String password,
+            String confirmPassword
+    ) {
+
+        if (name.isEmpty()
+                || email.isEmpty()
+                || password.isEmpty()
+                || confirmPassword.isEmpty()) {
+
+            composeUi.showError(
+                    "Preencha todos os campos.",
+                    "all"
+            );
+
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+
+            composeUi.showError(
+                    "As senhas não correspondem.",
+                    "confirm"
+            );
+
+            return;
+        }
+
+        if (name.length() > 50) {
+
+            composeUi.showError(
+                    "O nome deve possuir no máximo 50 caracteres.",
+                    "name"
+            );
+
+            return;
+        }
+
+        // Ponte temporária com a lógica XML existente.
+        edtNameRegister.setText(name);
+        edtEmailRegister.setText(email);
+        edtPasswordRegister.setText(password);
+        edtConfirmPassword.setText(confirmPassword);
+
+        composeUi.clearError();
+        composeUi.setLoading(true);
+
+        UserRegister(btnRegister);
     }
     private void UserRegister(View view) {
 
@@ -252,52 +320,50 @@ public class Cadastro extends AppCompatActivity {
 
                         SaveUserData();
 
-                    } else {
+                    }  else {
 
-                        registrationInProgress = false;
+            registrationInProgress = false;
 
-                        pgbRegister.setVisibility(View.GONE);
-                        btnRegister.setEnabled(true);
+            pgbRegister.setVisibility(View.GONE);
+            btnRegister.setEnabled(true);
 
-                        Exception exception = task.getException();
+            Exception exception = task.getException();
 
-                        String erro;
+            String erro;
+            String campoErro;
 
-                        if (exception instanceof FirebaseAuthWeakPasswordException) {
+            if (exception instanceof FirebaseAuthWeakPasswordException) {
 
-                            erro = "Digite uma senha com no mínimo 6 caracteres";
+                erro = "Digite uma senha com no mínimo 6 caracteres";
+                campoErro = "password";
 
-                        } else if (exception instanceof FirebaseAuthUserCollisionException) {
+            } else if (exception instanceof FirebaseAuthUserCollisionException) {
 
-                            erro = "Esta conta já foi cadastrada";
+                erro = "Esta conta já foi cadastrada";
+                campoErro = "email";
 
-                        } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+            } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
 
-                            erro = "E-mail inválido";
+                erro = "E-mail inválido";
+                campoErro = "email";
 
-                        } else {
+            } else {
 
-                            erro = "Erro ao cadastrar usuário";
+                erro = "Não foi possível realizar o cadastro. Tente novamente.";
+                campoErro = null;
+            }
 
-                        }
+            if (composeUi != null) {
+                composeUi.setLoading(false);
+                composeUi.showError(erro, campoErro);
+            }
 
-                        Snackbar snackbar = Snackbar.make(
-                                view,
-                                erro,
-                                Snackbar.LENGTH_SHORT
-                        );
-
-                        snackbar.setBackgroundTint(Color.WHITE);
-                        snackbar.setTextColor(Color.BLACK);
-
-                        snackbar.show();
-
-                        Log.e(
-                                "Cadastro",
-                                "Erro no Authentication",
-                                exception
-                        );
-                    }
+            Log.e(
+                    "Cadastro",
+                    "Erro no Authentication",
+                    exception
+            );
+        }
                 });
     }
     private void SaveUserData() {
@@ -309,14 +375,13 @@ public class Cadastro extends AppCompatActivity {
 
             registrationInProgress = false;
 
-            pgbRegister.setVisibility(View.GONE);
-            btnRegister.setEnabled(true);
-
-            Toast.makeText(
-                    this,
-                    "Sessão expirada. Faça login novamente.",
-                    Toast.LENGTH_LONG
-            ).show();
+            if (composeUi != null) {
+                composeUi.setLoading(false);
+                composeUi.showError(
+                        "Sua sessão expirou. Volte ao login e tente novamente.",
+                        null
+                );
+            }
 
             return;
         }
@@ -370,11 +435,13 @@ public class Cadastro extends AppCompatActivity {
                     pgbRegister.setVisibility(View.GONE);
                     btnRegister.setEnabled(true);
 
-                    Toast.makeText(
-                            this,
-                            "Conta criada, mas houve erro ao salvar o perfil. Toque em cadastrar para tentar novamente.",
-                            Toast.LENGTH_LONG
-                    ).show();
+                    if (composeUi != null) {
+                        composeUi.setLoading(false);
+                        composeUi.showError(
+                                "Conta criada, mas não foi possível salvar o perfil. Toque em criar conta para tentar novamente.",
+                                null
+                        );
+                    }
                 });
     }
     private void GoLoginScreen() {
@@ -450,6 +517,10 @@ public class Cadastro extends AppCompatActivity {
     private void finishRegistration() {
 
         registrationInProgress = false;
+
+        if (composeUi != null) {
+            composeUi.setLoading(false);
+        }
 
         pgbRegister.setVisibility(View.GONE);
 
