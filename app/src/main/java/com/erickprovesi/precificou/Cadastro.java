@@ -1,30 +1,19 @@
 package com.erickprovesi.precificou;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.text.method.HideReturnsTransformationMethod;
-import android.text.method.PasswordTransformationMethod;
 import android.graphics.ImageDecoder;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import com.erickprovesi.precificou.ui.CadastroComposeHost;
-import com.erickprovesi.precificou.ui.CadastroUiStateHandle;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.util.Patterns;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.snackbar.Snackbar;
+import com.erickprovesi.precificou.ui.CadastroComposeHost;
+import com.erickprovesi.precificou.ui.CadastroUiStateHandle;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -40,87 +29,103 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class Cadastro extends AppCompatActivity {
 
-    private EditText edtPasswordRegister, edtNameRegister, edtConfirmPassword, edtEmailRegister;
-    private Button btnRegister;
+    private static final String TAG = "Cadastro";
+
+    // Uma foto de perfil não precisa manter resolução de câmera.
+    private static final int PROFILE_IMAGE_MAX_SIZE = 1024;
+    private static final int PROFILE_IMAGE_JPEG_QUALITY = 80;
+
     private CadastroUiStateHandle composeUi;
-    private String[] messages = {"Preencha todos os campos.", "Cadastro realizado com sucesso.", "As senhas não correspondem.", "Nome muito longo."};
-    private String userID;
-    private ImageView imgBack;
-    private ProgressBar pgbRegister;
-    private ImageView imgEyeRegister, ImgEyeRegister2;
-    private CircleImageView imgProfileRegister;
-    StorageReference storageReference;
+    private StorageReference storageReference;
 
     private boolean registrationInProgress = false;
     private boolean authCreatedHere = false;
 
-    private Uri imgUri;
-    byte[] imageByte;
+    private String registrationName = "";
+    private String registrationEmail = "";
+    private String registrationPassword = "";
 
-    public void openLoginFromCompose() {
-        GoLoginScreen();
-    }
+    private byte[] imageByte;
 
-    public void openImagePickerFromCompose() {
-        pickImageLauncher.launch(
-                new PickVisualMediaRequest.Builder()
-                        .setMediaType(
-                                ActivityResultContracts.PickVisualMedia
-                                        .ImageOnly.INSTANCE
-                        )
-                        .build()
-        );
-    }
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.PickVisualMedia(),
                     uri -> {
+
                         if (uri == null) {
                             return;
                         }
 
-                        imgUri = uri;
-
                         try {
+
                             ImageDecoder.Source source =
                                     ImageDecoder.createSource(
                                             getContentResolver(),
-                                            imgUri
+                                            uri
                                     );
 
-                            Bitmap original = ImageDecoder.decodeBitmap(
+                            Bitmap image = ImageDecoder.decodeBitmap(
                                     source,
-                                    (decoder, info, src) ->
-                                            decoder.setAllocator(
-                                                    ImageDecoder.ALLOCATOR_SOFTWARE
-                                            )
+                                    (decoder, info, src) -> {
+
+                                        decoder.setAllocator(
+                                                ImageDecoder.ALLOCATOR_SOFTWARE
+                                        );
+
+                                        int width =
+                                                info.getSize().getWidth();
+
+                                        int height =
+                                                info.getSize().getHeight();
+
+                                        int largestSide =
+                                                Math.max(width, height);
+
+                                        if (largestSide > PROFILE_IMAGE_MAX_SIZE) {
+
+                                            float scale =
+                                                    (float) PROFILE_IMAGE_MAX_SIZE
+                                                            / largestSide;
+
+                                            int targetWidth =
+                                                    Math.round(width * scale);
+
+                                            int targetHeight =
+                                                    Math.round(height * scale);
+
+                                            decoder.setTargetSize(
+                                                    targetWidth,
+                                                    targetHeight
+                                            );
+                                        }
+                                    }
                             );
 
                             ByteArrayOutputStream stream =
                                     new ByteArrayOutputStream();
 
-                            original.compress(
+                            image.compress(
                                     Bitmap.CompressFormat.JPEG,
-                                    30,
+                                    PROFILE_IMAGE_JPEG_QUALITY,
                                     stream
                             );
-
-                            imgProfileRegister.setBackground(null);
-                            imgProfileRegister.setImageBitmap(original);
 
                             imageByte = stream.toByteArray();
 
                             if (composeUi != null) {
-                                composeUi.setProfileImage(original);
+                                composeUi.setProfileImage(image);
                             }
 
                         } catch (IOException | SecurityException e) {
-                            e.printStackTrace();
+
+                            Log.e(
+                                    TAG,
+                                    "Erro ao carregar imagem de perfil",
+                                    e
+                            );
 
                             Toast.makeText(
                                     Cadastro.this,
@@ -131,108 +136,40 @@ public class Cadastro extends AppCompatActivity {
                     }
             );
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cadastro);
 
-        edtPasswordRegister = findViewById(R.id.edtPasswordRegister);
-        edtNameRegister = findViewById(R.id.edtNameRegister);
-        edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
-        edtEmailRegister = findViewById(R.id.edtEmailRegister);
-        btnRegister = findViewById(R.id.btnRegister);
-        imgBack = findViewById(R.id.imgBack);
-        pgbRegister = findViewById(R.id.pgbRegister);
-        imgEyeRegister = findViewById(R.id.imgEyeRegister);
-        ImgEyeRegister2 = findViewById(R.id.imgEyeRegister2);
-        imgProfileRegister = findViewById(R.id.imgProfileRegister);
-        storageReference = FirebaseStorage.getInstance().getReference();
+        storageReference =
+                FirebaseStorage.getInstance().getReference();
 
-        imgEyeRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (edtPasswordRegister.getTransformationMethod().equals(HideReturnsTransformationMethod.getInstance())){
-                    //Se for visivel, vai esconder
-                    edtPasswordRegister.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    //Mudar icone
-                    imgEyeRegister.setImageResource(R.drawable.vetorolhofechado);
-                }else {
-                    edtPasswordRegister.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                    imgEyeRegister.setImageResource(R.drawable.vetorolhosenha);
-                }
-            }
-        });
-
-        ImgEyeRegister2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (edtConfirmPassword.getTransformationMethod().equals(HideReturnsTransformationMethod.getInstance())) {
-                    edtConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-
-                    ImgEyeRegister2.setImageResource(R.drawable.vetorolhofechado);
-                }else {
-                    edtConfirmPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                    ImgEyeRegister2.setImageResource(R.drawable.vetorolhosenha);
-                }
-            }
-        });
-
-        imgBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                GoLoginScreen();
-            }
-        });
-
-        imgProfileRegister.setOnClickListener(view -> {
-
-            pickImageLauncher.launch(
-                    new PickVisualMediaRequest.Builder()
-                            .setMediaType(
-                                    ActivityResultContracts.PickVisualMedia
-                                            .ImageOnly.INSTANCE
-                            )
-                            .build()
-            );
-
-        });
-
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                String name = edtNameRegister.getText().toString();
-                String password = edtPasswordRegister.getText().toString();
-                String confirm = edtConfirmPassword.getText().toString();
-                String email = edtEmailRegister.getText().toString();
-
-                if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                    Snackbar snackbar = Snackbar.make(view, messages[0], Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-
-                }else if(!password.equals(confirm)) {
-                    Snackbar snackbar = Snackbar.make(view, messages[2], Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-
-                }else if (name.length() > 50) {
-                    Snackbar snackbar = Snackbar.make(view, messages[3], Snackbar.LENGTH_SHORT);
-                    snackbar.setBackgroundTint(Color.WHITE);
-                    snackbar.setTextColor(Color.BLACK);
-                    snackbar.show();
-                    }
-                else {
-                    UserRegister(view);
-                }
-                }
-        });
-
-        composeUi = CadastroComposeHost.show(this);
-
+        composeUi =
+                CadastroComposeHost.show(this);
     }
+
+
+    public void openLoginFromCompose() {
+        finish();
+    }
+
+
+    public void openImagePickerFromCompose() {
+
+        if (registrationInProgress) {
+            return;
+        }
+
+        pickImageLauncher.launch(
+                new PickVisualMediaRequest.Builder()
+                        .setMediaType(
+                                ActivityResultContracts.PickVisualMedia
+                                        .ImageOnly.INSTANCE
+                        )
+                        .build()
+        );
+    }
+
 
     public void registerFromCompose(
             String name,
@@ -241,12 +178,22 @@ public class Cadastro extends AppCompatActivity {
             String confirmPassword
     ) {
 
-        if (name.isEmpty()
-                || email.isEmpty()
+        if (registrationInProgress) {
+            return;
+        }
+
+        String normalizedName =
+                name == null ? "" : name.trim();
+
+        String normalizedEmail =
+                email == null ? "" : email.trim();
+
+        if (normalizedName.isEmpty()
+                || normalizedEmail.isEmpty()
                 || password.isEmpty()
                 || confirmPassword.isEmpty()) {
 
-            composeUi.showError(
+            showError(
                     "Preencha todos os campos.",
                     "all"
             );
@@ -254,19 +201,9 @@ public class Cadastro extends AppCompatActivity {
             return;
         }
 
-        if (!password.equals(confirmPassword)) {
+        if (normalizedName.length() > 50) {
 
-            composeUi.showError(
-                    "As senhas não correspondem.",
-                    "confirm"
-            );
-
-            return;
-        }
-
-        if (name.length() > 50) {
-
-            composeUi.showError(
+            showError(
                     "O nome deve possuir no máximo 50 caracteres.",
                     "name"
             );
@@ -274,18 +211,52 @@ public class Cadastro extends AppCompatActivity {
             return;
         }
 
-        // Ponte temporária com a lógica XML existente.
-        edtNameRegister.setText(name);
-        edtEmailRegister.setText(email);
-        edtPasswordRegister.setText(password);
-        edtConfirmPassword.setText(confirmPassword);
+        if (!Patterns.EMAIL_ADDRESS
+                .matcher(normalizedEmail)
+                .matches()) {
 
-        composeUi.clearError();
-        composeUi.setLoading(true);
+            showError(
+                    "Digite um e-mail válido.",
+                    "email"
+            );
 
-        UserRegister(btnRegister);
+            return;
+        }
+
+        if (password.length() < 6) {
+
+            showError(
+                    "Digite uma senha com no mínimo 6 caracteres.",
+                    "password"
+            );
+
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+
+            showError(
+                    "As senhas não correspondem.",
+                    "confirm"
+            );
+
+            return;
+        }
+
+        registrationName = normalizedName;
+        registrationEmail = normalizedEmail;
+        registrationPassword = password;
+
+        if (composeUi != null) {
+            composeUi.clearError();
+            composeUi.setLoading(true);
+        }
+
+        userRegister();
     }
-    private void UserRegister(View view) {
+
+
+    private void userRegister() {
 
         if (registrationInProgress) {
             return;
@@ -293,216 +264,244 @@ public class Cadastro extends AppCompatActivity {
 
         registrationInProgress = true;
 
-        pgbRegister.setVisibility(View.VISIBLE);
-        btnRegister.setEnabled(false);
-
-        // Se a conta já foi criada nesta tela, mas houve
-        // falha ao salvar o perfil, tentamos novamente
-        // somente a gravação dos dados.
-
+        /*
+         * Caso o Authentication tenha sido criado,
+         * mas o Firestore tenha falhado, não tentamos
+         * criar a mesma conta novamente.
+         */
         if (authCreatedHere
-                && FirebaseAuth.getInstance().getCurrentUser() != null) {
+                && FirebaseAuth.getInstance()
+                .getCurrentUser() != null) {
 
-            SaveUserData();
+            saveUserData();
             return;
         }
 
-        String senha = edtPasswordRegister.getText().toString();
-        String email = edtEmailRegister.getText().toString();
-
         FirebaseAuth.getInstance()
-                .createUserWithEmailAndPassword(email, senha)
+                .createUserWithEmailAndPassword(
+                        registrationEmail,
+                        registrationPassword
+                )
                 .addOnCompleteListener(task -> {
 
                     if (task.isSuccessful()) {
 
                         authCreatedHere = true;
 
-                        SaveUserData();
+                        saveUserData();
 
-                    }  else {
+                        return;
+                    }
 
-            registrationInProgress = false;
+                    stopRegistration();
 
-            pgbRegister.setVisibility(View.GONE);
-            btnRegister.setEnabled(true);
+                    Exception exception =
+                            task.getException();
 
-            Exception exception = task.getException();
+                    String errorMessage;
+                    String errorField;
 
-            String erro;
-            String campoErro;
+                    if (exception
+                            instanceof FirebaseAuthWeakPasswordException) {
 
-            if (exception instanceof FirebaseAuthWeakPasswordException) {
+                        errorMessage =
+                                "Digite uma senha com no mínimo 6 caracteres.";
 
-                erro = "Digite uma senha com no mínimo 6 caracteres";
-                campoErro = "password";
+                        errorField = "password";
 
-            } else if (exception instanceof FirebaseAuthUserCollisionException) {
+                    } else if (exception
+                            instanceof FirebaseAuthUserCollisionException) {
 
-                erro = "Esta conta já foi cadastrada";
-                campoErro = "email";
+                        errorMessage =
+                                "Esta conta já foi cadastrada.";
 
-            } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+                        errorField = "email";
 
-                erro = "E-mail inválido";
-                campoErro = "email";
+                    } else if (exception
+                            instanceof FirebaseAuthInvalidCredentialsException) {
 
-            } else {
+                        errorMessage =
+                                "E-mail inválido.";
 
-                erro = "Não foi possível realizar o cadastro. Tente novamente.";
-                campoErro = null;
-            }
+                        errorField = "email";
 
-            if (composeUi != null) {
-                composeUi.setLoading(false);
-                composeUi.showError(erro, campoErro);
-            }
+                    } else {
 
-            Log.e(
-                    "Cadastro",
-                    "Erro no Authentication",
-                    exception
-            );
-        }
+                        errorMessage =
+                                "Não foi possível realizar o cadastro. Tente novamente.";
+
+                        errorField = null;
+                    }
+
+                    showError(
+                            errorMessage,
+                            errorField
+                    );
+
+                    Log.e(
+                            TAG,
+                            "Erro no Firebase Authentication",
+                            exception
+                    );
                 });
     }
-    private void SaveUserData() {
+
+
+    private void saveUserData() {
 
         FirebaseUser currentUser =
                 FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser == null) {
 
-            registrationInProgress = false;
+            stopRegistration();
 
-            if (composeUi != null) {
-                composeUi.setLoading(false);
-                composeUi.showError(
-                        "Sua sessão expirou. Volte ao login e tente novamente.",
-                        null
-                );
-            }
+            showError(
+                    "Sua sessão expirou. Volte ao login e tente novamente.",
+                    null
+            );
 
             return;
         }
 
-        String nome = edtNameRegister.getText().toString();
+        String userID =
+                currentUser.getUid();
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Map<String, Object> userData =
+                new HashMap<>();
 
-        userID = currentUser.getUid();
+        userData.put(
+                "nomeUsuario",
+                registrationName
+        );
 
-        Map<String, Object> users = new HashMap<>();
+        userData.put(
+                "idUsuario",
+                userID
+        );
 
-        users.put("nomeUsuario", nome);
-        users.put("idUsuario", userID);
-        users.put("fotoUsuario", "");
-        users.put("emailUsuario", edtEmailRegister.getText().toString());
+        userData.put(
+                "fotoUsuario",
+                ""
+        );
+
+        /*
+         * Usa preferencialmente o e-mail realmente
+         * associado ao Authentication.
+         */
+        String authenticatedEmail =
+                currentUser.getEmail();
+
+        userData.put(
+                "emailUsuario",
+                authenticatedEmail != null
+                        ? authenticatedEmail
+                        : registrationEmail
+        );
+
+        FirebaseFirestore db =
+                FirebaseFirestore.getInstance();
 
         DocumentReference documentReference =
-                db.collection("Usuario").document(userID);
+                db.collection("Usuario")
+                        .document(userID);
 
-        documentReference.set(users)
+        documentReference.set(userData)
 
                 .addOnSuccessListener(unused -> {
 
                     Log.d(
-                            "Cadastro",
+                            TAG,
                             "Perfil salvo no Firestore"
                     );
 
                     if (imageByte != null) {
 
-                        uploadImageToFirebase(imageByte);
+                        uploadImageToFirebase(
+                                imageByte
+                        );
 
                     } else {
 
                         finishRegistration();
                     }
-
                 })
 
                 .addOnFailureListener(e -> {
 
                     Log.e(
-                            "Cadastro",
+                            TAG,
                             "Erro ao salvar perfil no Firestore",
                             e
                     );
 
-                    registrationInProgress = false;
+                    stopRegistration();
 
-                    pgbRegister.setVisibility(View.GONE);
-                    btnRegister.setEnabled(true);
-
-                    if (composeUi != null) {
-                        composeUi.setLoading(false);
-                        composeUi.showError(
-                                "Conta criada, mas não foi possível salvar o perfil. Toque em criar conta para tentar novamente.",
-                                null
-                        );
-                    }
+                    showError(
+                            "Conta criada, mas não foi possível salvar o perfil. Toque em criar conta para tentar novamente.",
+                            null
+                    );
                 });
     }
-    private void GoLoginScreen() {
-        finish();
-    }
 
-    @Override
-    public void finish() {
-        super.finish();
 
-        overridePendingTransition(
-                R.anim.login_enter,
-                R.anim.register_exit
-        );
-    }
-
-    private void uploadImageToFirebase(byte[] imageByte) {
+    private void uploadImageToFirebase(
+            byte[] imageData
+    ) {
 
         FirebaseUser currentUser =
                 FirebaseAuth.getInstance().getCurrentUser();
 
+        /*
+         * A foto é opcional.
+         * Se a sessão desaparecer neste ponto,
+         * a conta e o perfil já foram criados.
+         */
         if (currentUser == null) {
 
-            registrationInProgress = false;
+            Toast.makeText(
+                    this,
+                    "Conta criada, mas não foi possível enviar a foto.",
+                    Toast.LENGTH_LONG
+            ).show();
 
-            pgbRegister.setVisibility(View.GONE);
-            btnRegister.setEnabled(true);
+            finishRegistration();
 
             return;
         }
 
-        String uid = currentUser.getUid();
+        String uid =
+                currentUser.getUid();
 
-        StorageReference fileRef =
+        /*
+         * Mantemos o mesmo caminho utilizado
+         * anteriormente para não quebrar referências
+         * existentes no projeto.
+         */
+        StorageReference fileReference =
                 storageReference.child(
                         uid + "/" + uid + ".png"
                 );
 
-        fileRef.putBytes(imageByte)
+        fileReference.putBytes(imageData)
 
                 .addOnSuccessListener(taskSnapshot -> {
 
                     Log.d(
-                            "Cadastro",
+                            TAG,
                             "Imagem enviada com sucesso"
                     );
 
                     finishRegistration();
-
                 })
 
                 .addOnFailureListener(e -> {
 
                     Log.e(
-                            "Cadastro",
+                            TAG,
                             "Erro ao enviar foto de perfil",
                             e
                     );
-
-                    // A foto é opcional. A conta e o perfil
-                    // já foram criados com sucesso.
 
                     Toast.makeText(
                             this,
@@ -514,17 +513,34 @@ public class Cadastro extends AppCompatActivity {
                 });
     }
 
-    private void finishRegistration() {
+
+    private void showError(
+            String message,
+            String field
+    ) {
+
+        if (composeUi != null) {
+            composeUi.showError(
+                    message,
+                    field
+            );
+        }
+    }
+
+
+    private void stopRegistration() {
 
         registrationInProgress = false;
 
         if (composeUi != null) {
             composeUi.setLoading(false);
         }
+    }
 
-        pgbRegister.setVisibility(View.GONE);
 
-        btnRegister.setEnabled(true);
+    private void finishRegistration() {
+
+        stopRegistration();
 
         Toast.makeText(
                 this,
@@ -532,8 +548,20 @@ public class Cadastro extends AppCompatActivity {
                 Toast.LENGTH_SHORT
         ).show();
 
-        FirebaseAuth.getInstance().signOut();
+        FirebaseAuth.getInstance()
+                .signOut();
 
-        GoLoginScreen();
+        finish();
+    }
+
+
+    @Override
+    public void finish() {
+        super.finish();
+
+        overridePendingTransition(
+                R.anim.login_enter,
+                R.anim.register_exit
+        );
     }
 }

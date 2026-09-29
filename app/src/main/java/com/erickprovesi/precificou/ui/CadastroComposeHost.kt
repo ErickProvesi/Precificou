@@ -1,7 +1,6 @@
 package com.erickprovesi.precificou.ui
 
 import android.graphics.Bitmap
-import android.view.ViewGroup
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
@@ -127,13 +126,7 @@ object CadastroComposeHost {
             }
         }
 
-        activity.addContentView(
-            composeView,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        activity.setContentView(composeView)
 
         return state
     }
