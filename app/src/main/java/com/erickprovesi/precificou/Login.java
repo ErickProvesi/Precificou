@@ -282,9 +282,13 @@ public class Login extends AppCompatActivity {
     }
 
     private void registrationScreen() {
-        Intent GoRegister = new Intent(Login.this, Cadastro.class);
-        startActivity(GoRegister);
-        finish();
+        Intent goRegister = new Intent(Login.this, Cadastro.class);
+        startActivity(goRegister);
+
+        overridePendingTransition(
+                R.anim.register_enter,
+                R.anim.login_exit
+        );
     }
 
     private void SaveUserDataGoogle() {

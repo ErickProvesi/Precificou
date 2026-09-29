@@ -12,6 +12,7 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import com.erickprovesi.precificou.ui.CadastroComposeHost;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -56,6 +57,21 @@ public class Cadastro extends AppCompatActivity {
 
     private Uri imgUri;
     byte[] imageByte;
+
+    public void openLoginFromCompose() {
+        GoLoginScreen();
+    }
+
+    public void openImagePickerFromCompose() {
+        pickImageLauncher.launch(
+                new PickVisualMediaRequest.Builder()
+                        .setMediaType(
+                                ActivityResultContracts.PickVisualMedia
+                                        .ImageOnly.INSTANCE
+                        )
+                        .build()
+        );
+    }
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickImageLauncher =
             registerForActivityResult(
@@ -197,6 +213,8 @@ public class Cadastro extends AppCompatActivity {
                 }
                 }
         });
+
+        CadastroComposeHost.show(this);
 
     }
     private void UserRegister(View view) {
@@ -360,9 +378,17 @@ public class Cadastro extends AppCompatActivity {
                 });
     }
     private void GoLoginScreen() {
-        Intent GoLogin = new Intent(Cadastro.this, Login.class);
-        startActivity(GoLogin);
         finish();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+
+        overridePendingTransition(
+                R.anim.login_enter,
+                R.anim.register_exit
+        );
     }
 
     private void uploadImageToFirebase(byte[] imageByte) {
